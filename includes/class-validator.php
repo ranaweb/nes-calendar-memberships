@@ -39,8 +39,9 @@ final class NESCM_Validator {
 			return $items;
 		}
 
-		if ( defined( 'NESCM_TEST_DATE' ) ) {
-			$items[] = $this->item( 'warning', __( 'Test Date Override', 'nes-calendar-memberships' ), __( 'NESCM_TEST_DATE is active.', 'nes-calendar-memberships' ), __( 'Remove the constant before production launch.', 'nes-calendar-memberships' ) );
+		$active_test_date = $this->settings->active_test_date();
+		if ( ! empty( $active_test_date['date'] ) ) {
+			$items[] = $this->item( 'warning', __( 'Test Date Override', 'nes-calendar-memberships' ), sprintf( __( 'Test date override is active: %s.', 'nes-calendar-memberships' ), $active_test_date['date'] ), __( 'Remove the constant or clear the setting before production launch.', 'nes-calendar-memberships' ) );
 		}
 
 		$settings = $this->settings->all();
@@ -76,6 +77,10 @@ final class NESCM_Validator {
 				$items[] = $this->item( 'error', $title, __( 'Missing or invalid valid-through date.', 'nes-calendar-memberships' ), __( 'Set valid through to December 31 of the membership year.', 'nes-calendar-memberships' ) );
 			}
 
+			if ( preg_match( '/^\d{4}$/', $year ) && $through && nescm_parse_date( $through ) && (int) substr( $through, 0, 4 ) !== (int) $year ) {
+				$items[] = $this->item( 'error', $title, __( 'Product year and valid-through year do not match.', 'nes-calendar-memberships' ), __( 'Set valid through to December 31 of the same membership year.', 'nes-calendar-memberships' ) );
+			}
+
 			if ( 'manual' === $method && $family && $year ) {
 				$key = $family . ':' . $year;
 				if ( isset( $seen[ $key ] ) ) {
@@ -103,6 +108,26 @@ final class NESCM_Validator {
 				} elseif ( ! $this->adapter->is_published_membership( $target_id ) ) {
 					$items[] = $this->item( 'warning', get_the_title( $target_id ), __( 'Target membership exists but is not published.', 'nes-calendar-memberships' ), __( 'Publish it before renewal links should route members there.', 'nes-calendar-memberships' ) );
 				}
+			}
+		}
+
+		if ( ! $this->adapter->has_any_nes_transactions() ) {
+			$items[] = $this->item( 'warning', __( 'Dashboard Shortcodes', 'nes-calendar-memberships' ), __( 'Dashboard shortcodes cannot determine a current user membership until NES MemberPress transactions exist.', 'nes-calendar-memberships' ), __( 'After test purchases or imports, verify the account dashboard with a real member user.', 'nes-calendar-memberships' ) );
+		}
+
+		foreach ( $this->adapter->pending_offline_transactions() as $pending ) {
+			$family = (string) get_post_meta( (int) $pending->product_id, '_nescm_family_key', true );
+			$date   = wp_date( 'Y-m-d', strtotime( (string) $pending->created_at ) ?: null, wp_timezone() );
+			$parsed = nescm_parse_date( $date );
+			if ( ! $family || ! $parsed ) {
+				$items[] = $this->item( 'error', '#' . (int) $pending->id, __( 'Pending offline payment exists but family/date cannot be calculated.', 'nes-calendar-memberships' ), __( 'Review the pending transaction and membership metadata.', 'nes-calendar-memberships' ) );
+				continue;
+			}
+
+			$year      = $this->calculator->get_membership_year_for_date( $parsed );
+			$target_id = $this->adapter->find_membership( $family, $year, 'manual' );
+			if ( ! $target_id ) {
+				$items[] = $this->item( 'error', '#' . (int) $pending->id, sprintf( __( 'Pending offline payment cannot find target membership for %1$s %2$d.', 'nes-calendar-memberships' ), $family, $year ), __( 'Create/publish the target year-specific membership before completing the payment.', 'nes-calendar-memberships' ) );
 			}
 		}
 

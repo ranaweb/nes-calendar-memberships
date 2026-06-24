@@ -20,9 +20,10 @@ final class NESCM_Settings {
 	public static function defaults(): array {
 		return array(
 			'cutoff_month'               => 9,
-			'cutoff_day'                 => 1,
+			'cutoff_day'                 => 30,
 			'renewal_month'              => 1,
 			'renewal_day'                => 1,
+			'test_date_override'         => '',
 			'manual_payment_access_mode' => 'pending_until_complete',
 			'enable_auto_renew_cta'      => 'no',
 			'auto_renew_cta_url'         => '',
@@ -83,17 +84,27 @@ final class NESCM_Settings {
 		$output['cutoff_day']    = max( 1, min( 31, absint( $input['cutoff_day'] ?? $defaults['cutoff_day'] ) ) );
 		$output['renewal_month'] = max( 1, min( 12, absint( $input['renewal_month'] ?? $defaults['renewal_month'] ) ) );
 		$output['renewal_day']   = max( 1, min( 31, absint( $input['renewal_day'] ?? $defaults['renewal_day'] ) ) );
+		$output['test_date_override'] = '';
 
 		if ( ! checkdate( $output['cutoff_month'], $output['cutoff_day'], 2026 ) ) {
 			$output['cutoff_month'] = $defaults['cutoff_month'];
 			$output['cutoff_day']   = $defaults['cutoff_day'];
-			nescm_add_admin_notice( __( 'Invalid cutoff date. The cutoff was reset to September 1.', 'nes-calendar-memberships' ), 'error' );
+			nescm_add_admin_notice( __( 'Invalid cutoff date. The cutoff was reset to September 30.', 'nes-calendar-memberships' ), 'error' );
 		}
 
 		if ( ! checkdate( $output['renewal_month'], $output['renewal_day'], 2026 ) ) {
 			$output['renewal_month'] = $defaults['renewal_month'];
 			$output['renewal_day']   = $defaults['renewal_day'];
 			nescm_add_admin_notice( __( 'Invalid renewal display date. The renewal date was reset to January 1.', 'nes-calendar-memberships' ), 'error' );
+		}
+
+		if ( ! empty( $input['test_date_override'] ) ) {
+			$test_date = sanitize_text_field( (string) $input['test_date_override'] );
+			if ( nescm_parse_date( $test_date ) ) {
+				$output['test_date_override'] = $test_date;
+			} else {
+				nescm_add_admin_notice( __( 'Invalid test date override. The override was not saved.', 'nes-calendar-memberships' ), 'error' );
+			}
 		}
 
 		$access_mode = sanitize_key( (string) ( $input['manual_payment_access_mode'] ?? $defaults['manual_payment_access_mode'] ) );
@@ -137,6 +148,7 @@ final class NESCM_Settings {
 
 		echo '<div class="wrap nescm-admin">';
 		echo '<h1>' . esc_html__( 'NES Calendar Memberships', 'nes-calendar-memberships' ) . '</h1>';
+		$this->render_test_date_banner();
 		echo '<nav class="nav-tab-wrapper">';
 
 		foreach ( $this->tabs as $slug => $data ) {
@@ -147,13 +159,70 @@ final class NESCM_Settings {
 
 		echo '</nav>';
 		echo '<div class="nescm-tab-panel">';
-		call_user_func( $this->tabs[ $tab ]['callback'] );
+		if ( ! $this->adapter->is_active() && in_array( $tab, array( 'manual-renewal', 'generate-year' ), true ) ) {
+			printf(
+				'<div class="notice notice-error inline"><p>%s</p></div>',
+				esc_html__( 'NES Calendar Memberships requires MemberPress to be active. Please activate MemberPress before using NES membership tools.', 'nes-calendar-memberships' )
+			);
+		} else {
+			call_user_func( $this->tabs[ $tab ]['callback'] );
+		}
 		echo '</div>';
 		echo '</div>';
 	}
 
+	public function active_test_date(): array {
+		if ( defined( 'NES_MEMBERSHIP_TEST_DATE' ) ) {
+			$constant_date = (string) NES_MEMBERSHIP_TEST_DATE;
+			if ( nescm_parse_date( $constant_date ) ) {
+				return array(
+					'date'   => $constant_date,
+					'source' => 'constant',
+				);
+			}
+		}
+
+		$setting_date = (string) $this->get( 'test_date_override', '' );
+		if ( $setting_date && nescm_parse_date( $setting_date ) ) {
+			return array(
+				'date'   => $setting_date,
+				'source' => 'setting',
+			);
+		}
+
+		return array(
+			'date'   => '',
+			'source' => '',
+		);
+	}
+
+	private function render_test_date_banner(): void {
+		$active = $this->active_test_date();
+		if ( empty( $active['date'] ) ) {
+			return;
+		}
+
+		$source = 'constant' === $active['source']
+			? __( 'NES_MEMBERSHIP_TEST_DATE constant', 'nes-calendar-memberships' )
+			: __( 'admin setting', 'nes-calendar-memberships' );
+
+		printf(
+			'<div class="notice notice-error nescm-test-date-warning"><p><strong>%1$s</strong> %2$s</p></div>',
+			esc_html__( 'Test date override is active.', 'nes-calendar-memberships' ),
+			esc_html(
+				sprintf(
+					/* translators: 1: date, 2: source */
+					__( 'Calendar-year calculations are using %1$s from %2$s. Remove this before production use.', 'nes-calendar-memberships' ),
+					$active['date'],
+					$source
+				)
+			)
+		);
+	}
+
 	public function render_settings_tab(): void {
 		$settings = $this->all();
+		$months   = nescm_months();
 		?>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="nescm_save_settings" />
@@ -161,19 +230,46 @@ final class NESCM_Settings {
 
 			<table class="form-table" role="presentation">
 				<tr>
-					<th scope="row"><label for="nescm_cutoff_month"><?php esc_html_e( 'Next-Year Renewal Start', 'nes-calendar-memberships' ); ?></label></th>
+					<th scope="row"><?php esc_html_e( 'Annual Cutoff Date', 'nes-calendar-memberships' ); ?></th>
 					<td>
-						<input id="nescm_cutoff_month" class="small-text" type="number" min="1" max="12" name="nescm_settings[cutoff_month]" value="<?php echo esc_attr( (string) $settings['cutoff_month'] ); ?>" />
-						<input class="small-text" type="number" min="1" max="31" name="nescm_settings[cutoff_day]" value="<?php echo esc_attr( (string) $settings['cutoff_day'] ); ?>" />
-						<p class="description"><?php esc_html_e( 'Month and day when renewals begin routing to the next membership year. Default: September 1.', 'nes-calendar-memberships' ); ?></p>
+						<label for="nescm_cutoff_month"><?php esc_html_e( 'Cutoff Month', 'nes-calendar-memberships' ); ?></label>
+						<select id="nescm_cutoff_month" name="nescm_settings[cutoff_month]">
+							<?php foreach ( $months as $number => $label ) : ?>
+								<option value="<?php echo esc_attr( (string) $number ); ?>" <?php selected( (int) $settings['cutoff_month'], $number ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<label for="nescm_cutoff_day"><?php esc_html_e( 'Cutoff Day', 'nes-calendar-memberships' ); ?></label>
+						<select id="nescm_cutoff_day" name="nescm_settings[cutoff_day]">
+							<?php for ( $day = 1; $day <= 31; $day++ ) : ?>
+								<option value="<?php echo esc_attr( (string) $day ); ?>" <?php selected( (int) $settings['cutoff_day'], $day ); ?>><?php echo esc_html( (string) $day ); ?></option>
+							<?php endfor; ?>
+						</select>
+						<p class="description"><?php esc_html_e( 'Renewals after this annual cutoff date are treated as next-year memberships. Default: September 30.', 'nes-calendar-memberships' ); ?></p>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="nescm_renewal_month"><?php esc_html_e( 'Renewal Display Date', 'nes-calendar-memberships' ); ?></label></th>
+					<th scope="row"><?php esc_html_e( 'Renewal Display Date', 'nes-calendar-memberships' ); ?></th>
 					<td>
-						<input id="nescm_renewal_month" class="small-text" type="number" min="1" max="12" name="nescm_settings[renewal_month]" value="<?php echo esc_attr( (string) $settings['renewal_month'] ); ?>" />
-						<input class="small-text" type="number" min="1" max="31" name="nescm_settings[renewal_day]" value="<?php echo esc_attr( (string) $settings['renewal_day'] ); ?>" />
+						<label for="nescm_renewal_month"><?php esc_html_e( 'Renewal Month', 'nes-calendar-memberships' ); ?></label>
+						<select id="nescm_renewal_month" name="nescm_settings[renewal_month]">
+							<?php foreach ( $months as $number => $label ) : ?>
+								<option value="<?php echo esc_attr( (string) $number ); ?>" <?php selected( (int) $settings['renewal_month'], $number ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<label for="nescm_renewal_day"><?php esc_html_e( 'Renewal Day', 'nes-calendar-memberships' ); ?></label>
+						<select id="nescm_renewal_day" name="nescm_settings[renewal_day]">
+							<?php for ( $day = 1; $day <= 31; $day++ ) : ?>
+								<option value="<?php echo esc_attr( (string) $day ); ?>" <?php selected( (int) $settings['renewal_day'], $day ); ?>><?php echo esc_html( (string) $day ); ?></option>
+							<?php endfor; ?>
+						</select>
 						<p class="description"><?php esc_html_e( 'Display/business anchor only in this phase. Default: January 1.', 'nes-calendar-memberships' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nescm_test_date_override"><?php esc_html_e( 'Test Date Override', 'nes-calendar-memberships' ); ?></label></th>
+					<td>
+						<input id="nescm_test_date_override" type="date" name="nescm_settings[test_date_override]" value="<?php echo esc_attr( $settings['test_date_override'] ); ?>" />
+						<p class="description"><?php esc_html_e( 'For staging/testing only. Leave blank on production.', 'nes-calendar-memberships' ); ?></p>
 					</td>
 				</tr>
 				<tr>

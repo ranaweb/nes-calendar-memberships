@@ -37,6 +37,8 @@ final class NESCM_Membership_Meta {
 	public function hooks(): void {
 		add_action( 'add_meta_boxes', array( $this, 'add_metabox' ) );
 		add_action( 'save_post_' . $this->adapter->get_membership_post_type(), array( $this, 'save' ), 10, 2 );
+		add_filter( 'manage_' . $this->adapter->get_membership_post_type() . '_posts_columns', array( $this, 'membership_columns' ) );
+		add_action( 'manage_' . $this->adapter->get_membership_post_type() . '_posts_custom_column', array( $this, 'render_membership_column' ), 10, 2 );
 	}
 
 	public function add_metabox(): void {
@@ -159,6 +161,56 @@ final class NESCM_Membership_Meta {
 		$values['_nescm_renewal_method_type'] = $values['_nescm_renewal_method_type'] ?: 'manual';
 
 		return $values;
+	}
+
+	public function membership_columns( array $columns ): array {
+		$insert = array(
+			'nescm_family'        => __( 'NES Family', 'nes-calendar-memberships' ),
+			'nescm_year'          => __( 'NES Year', 'nes-calendar-memberships' ),
+			'nescm_valid_through' => __( 'Valid Through', 'nes-calendar-memberships' ),
+			'nescm_renewal_type'  => __( 'Renewal Type', 'nes-calendar-memberships' ),
+		);
+
+		$output = array();
+		foreach ( $columns as $key => $label ) {
+			$output[ $key ] = $label;
+			if ( 'title' === $key ) {
+				$output = array_merge( $output, $insert );
+			}
+		}
+
+		return $output;
+	}
+
+	public function render_membership_column( string $column, int $post_id ): void {
+		if ( ! str_starts_with( $column, 'nescm_' ) ) {
+			return;
+		}
+
+		$families = nescm_get_families();
+		$methods  = nescm_get_renewal_method_types();
+
+		if ( 'nescm_family' === $column ) {
+			$family = (string) get_post_meta( $post_id, '_nescm_family_key', true );
+			echo esc_html( $families[ $family ] ?? $family ?: '-' );
+			return;
+		}
+
+		if ( 'nescm_year' === $column ) {
+			echo esc_html( (string) get_post_meta( $post_id, '_nescm_membership_year', true ) ?: '-' );
+			return;
+		}
+
+		if ( 'nescm_valid_through' === $column ) {
+			$through = (string) get_post_meta( $post_id, '_nescm_valid_through', true );
+			echo esc_html( $through ? nescm_format_display_date( $through ) : '-' );
+			return;
+		}
+
+		if ( 'nescm_renewal_type' === $column ) {
+			$method = (string) get_post_meta( $post_id, '_nescm_renewal_method_type', true );
+			echo esc_html( $methods[ $method ] ?? $method ?: '-' );
+		}
 	}
 
 	private function sanitize_meta( array $raw, int $post_id ): array {

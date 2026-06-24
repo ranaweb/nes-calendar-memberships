@@ -6,7 +6,7 @@ NES Calendar Memberships is a focused MemberPress extension for NES calendar-yea
 
 - Adds NES calendar-year metadata to MemberPress memberships.
 - Routes `/membership-renew/?family=resident` style renewal links to the correct year-specific MemberPress checkout.
-- Uses September 1 as the default first date for next-year renewals.
+- Uses September 30 as the default annual cutoff date. Renewals after the cutoff route to the next membership year.
 - Shows clear checkout notices with membership year and December 31 expiration.
 - Records NES transaction metadata when MemberPress transactions are stored.
 - Provides dashboard shortcodes for membership level, status, expiration, renewal method, CTA, and summary.
@@ -59,7 +59,7 @@ If MemberPress changes these internals, update `includes/class-memberpress-adapt
 1. Activate MemberPress.
 2. Activate NES Calendar Memberships.
 3. Go to `MemberPress > NES Calendar Memberships`.
-4. Confirm the next-year renewal start date. The default is September 1.
+4. Confirm the annual cutoff date. The default is September 30.
 5. Edit each year-specific MemberPress membership.
 6. Enable `NES Calendar Membership Rules`.
 7. Assign the family key, public label, membership year, valid dates, and renewal method.
@@ -108,11 +108,13 @@ The router calculates the target membership year from the current date and confi
 
 Manual memberships use `Expires`. The plugin only uses automatic-renewal wording when it can detect an active MemberPress subscription.
 
-## Manual Cheque/Zelle Renewal
+## Offline Payments / Manual Renewals
 
-Use `MemberPress > NES Calendar Memberships > Manual Renewal`.
+Use `MemberPress > NES Calendar Memberships > Offline Payments / Manual Renewals`.
 
-The helper asks for member, family, payment date, payment method, amount, reference, note, and target status. It calculates the membership year from the payment date and the September 1 renewal-start rule, finds the matching year-specific MemberPress membership, and creates a manual MemberPress transaction.
+The primary workflow is reviewing pending cheque/Zelle/offline MemberPress transactions. The screen shows pending NES transactions, calculates the target membership year from the payment received date and annual cutoff, then lets an admin complete and activate the transaction or cancel/void it.
+
+The secondary workflow is `Create Manual Renewal Manually`. Use it only if the member did not complete an online cheque/Zelle checkout and you need to record a payment received outside the website.
 
 The default action creates a pending manual renewal. Admins may choose completed renewal when recording money already received.
 
@@ -137,17 +139,23 @@ The checkup screen flags issues such as:
 - Manual products that appear recurring.
 - NES valid-through dates that do not match MemberPress fixed expiration.
 - Auto-renew CTA enabled without a URL.
-- `NESCM_TEST_DATE` active.
+- `NES_MEMBERSHIP_TEST_DATE` or admin test date override active.
 
 ## Developer Test Date Override
 
 For testing only:
 
 ```php
-define( 'NESCM_TEST_DATE', '2026-09-01' );
+define( 'NES_MEMBERSHIP_TEST_DATE', '2026-12-16' );
 ```
 
-When defined and the current user is an admin or `WP_DEBUG` is true, the calculator uses that date. Remove it before production.
+Date source priority:
+
+1. `NES_MEMBERSHIP_TEST_DATE` constant, if defined and valid.
+2. Admin test date override, if set and valid.
+3. Current date in the WordPress site timezone.
+
+When a test date is active, NES admin tabs show a large warning banner. Remove the constant or clear the setting before production.
 
 ## Release Packaging
 

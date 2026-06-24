@@ -31,6 +31,28 @@ function nescm_get_renewal_method_types(): array {
 	);
 }
 
+function nescm_months(): array {
+	return array(
+		1  => __( 'January', 'nes-calendar-memberships' ),
+		2  => __( 'February', 'nes-calendar-memberships' ),
+		3  => __( 'March', 'nes-calendar-memberships' ),
+		4  => __( 'April', 'nes-calendar-memberships' ),
+		5  => __( 'May', 'nes-calendar-memberships' ),
+		6  => __( 'June', 'nes-calendar-memberships' ),
+		7  => __( 'July', 'nes-calendar-memberships' ),
+		8  => __( 'August', 'nes-calendar-memberships' ),
+		9  => __( 'September', 'nes-calendar-memberships' ),
+		10 => __( 'October', 'nes-calendar-memberships' ),
+		11 => __( 'November', 'nes-calendar-memberships' ),
+		12 => __( 'December', 'nes-calendar-memberships' ),
+	);
+}
+
+function nescm_format_month_day( int $month, int $day ): string {
+	$months = nescm_months();
+	return sprintf( '%1$s %2$d', $months[ $month ] ?? (string) $month, $day );
+}
+
 function nescm_is_valid_family_key( string $family_key ): bool {
 	return array_key_exists( $family_key, nescm_get_families() );
 }

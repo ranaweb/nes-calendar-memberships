@@ -20,9 +20,9 @@ const readme = read(readmePath);
 const pkg = JSON.parse(read(packagePath));
 
 const checks = [
-  ['main version', /Version:\s*1\.0\.0/.test(main)],
-  ['readme stable tag', /Stable tag:\s*1\.0\.0/.test(readme)],
-  ['package version', pkg.version === '1.0.0'],
+  ['main version', /Version:\s*1\.0\.1/.test(main)],
+  ['readme stable tag', /Stable tag:\s*1\.0\.1/.test(readme)],
+  ['package version', pkg.version === '1.0.1'],
   ['author', /Author:\s*Cider House/.test(main)],
   ['requires php', /Requires PHP:\s*8\.1/.test(main) && /Requires PHP:\s*8\.1/.test(readme)],
   ['tested up to', /Tested up to:\s*7\.0/.test(main) && /Tested up to:\s*7\.0/.test(readme)],

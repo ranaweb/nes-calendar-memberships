@@ -61,7 +61,7 @@ final class NESCM_Plugin {
 		$this->validator            = new NESCM_Validator( $this->adapter, $this->settings, $this->calculator );
 
 		$this->settings->register_tab( 'settings', __( 'Settings', 'nes-calendar-memberships' ), array( $this->settings, 'render_settings_tab' ) );
-		$this->settings->register_tab( 'manual-renewal', __( 'Manual Renewal', 'nes-calendar-memberships' ), array( $this->manual_renewal, 'render_tab' ) );
+		$this->settings->register_tab( 'manual-renewal', __( 'Offline Payments / Manual Renewals', 'nes-calendar-memberships' ), array( $this->manual_renewal, 'render_tab' ) );
 		$this->settings->register_tab( 'generate-year', __( 'Generate Year', 'nes-calendar-memberships' ), array( $this->year_generator, 'render_tab' ) );
 		$this->settings->register_tab( 'checkup', __( 'Checkup', 'nes-calendar-memberships' ), array( $this->validator, 'render_tab' ) );
 
@@ -90,7 +90,7 @@ final class NESCM_Plugin {
 
 		printf(
 			'<div class="notice notice-warning"><p>%s</p></div>',
-			esc_html__( 'NES Calendar Memberships requires MemberPress to be active. Calendar-year routing and dashboard shortcodes are currently disabled, but NES settings remain available.', 'nes-calendar-memberships' )
+			esc_html__( 'NES Calendar Memberships requires MemberPress to be active. Please activate MemberPress before using NES membership tools.', 'nes-calendar-memberships' )
 		);
 	}
 }

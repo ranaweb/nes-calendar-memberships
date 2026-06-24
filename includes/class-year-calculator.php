@@ -17,8 +17,16 @@ final class NESCM_Year_Calculator {
 	}
 
 	public function today(): DateTimeImmutable {
-		if ( defined( 'NESCM_TEST_DATE' ) && ( current_user_can( nescm_admin_capability() ) || ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ) ) {
-			$parsed = nescm_parse_date( (string) NESCM_TEST_DATE );
+		if ( defined( 'NES_MEMBERSHIP_TEST_DATE' ) ) {
+			$parsed = nescm_parse_date( (string) NES_MEMBERSHIP_TEST_DATE );
+			if ( $parsed ) {
+				return $parsed;
+			}
+		}
+
+		$setting_date = (string) $this->settings->get( 'test_date_override', '' );
+		if ( $setting_date ) {
+			$parsed = nescm_parse_date( $setting_date );
 			if ( $parsed ) {
 				return $parsed;
 			}
@@ -39,12 +47,12 @@ final class NESCM_Year_Calculator {
 		$year   = (int) $local->format( 'Y' );
 		$cutoff = $this->get_cutoff_date( $year );
 
-		return $local >= $cutoff ? $year + 1 : $year;
+		return $local > $cutoff->setTime( 23, 59, 59 ) ? $year + 1 : $year;
 	}
 
 	public function is_after_cutoff( DateTimeInterface $date ): bool {
 		$local = DateTimeImmutable::createFromInterface( $date )->setTimezone( wp_timezone() );
-		return $local >= $this->get_cutoff_date( (int) $local->format( 'Y' ) );
+		return $local > $this->get_cutoff_date( (int) $local->format( 'Y' ) )->setTime( 23, 59, 59 );
 	}
 
 	public function get_valid_from_for_year( int $year ): DateTimeImmutable {
@@ -56,10 +64,10 @@ final class NESCM_Year_Calculator {
 	}
 
 	public function get_sales_window_start_for_year( int $membership_year ): DateTimeImmutable {
-		return $this->get_cutoff_date( $membership_year - 1 );
+		return $this->get_cutoff_date( $membership_year - 1 )->modify( '+1 day' );
 	}
 
 	public function get_sales_window_end_for_year( int $membership_year ): DateTimeImmutable {
-		return $this->get_cutoff_date( $membership_year )->modify( '-1 day' )->setTime( 23, 59, 59 );
+		return $this->get_cutoff_date( $membership_year )->setTime( 23, 59, 59 );
 	}
 }

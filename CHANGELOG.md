@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.1 - 2026-06-24
+
+- Added `NES_MEMBERSHIP_TEST_DATE` and admin test-date override support.
+- Changed cutoff calculations so the cutoff date is inclusive; renewals after the cutoff route to the next membership year.
+- Updated the default annual cutoff to September 30.
+- Replaced numeric cutoff/renewal fields with month and day dropdowns.
+- Added admin-only test-date warning banner.
+- Renamed the manual renewal tab to Offline Payments / Manual Renewals.
+- Added pending offline payment review, completion, and void workflows.
+- Added calculation previews for pending offline payments and manual renewal creation.
+- Added duplicate prevention to pending offline payment completion.
+- Added NES columns to the MemberPress memberships list.
+- Expanded Checkup warnings for year/date mismatches, pending offline payments, and dashboard data readiness.
+
 ## 1.0.0 - 2026-06-24
 
 - Added safe plugin bootstrap and MemberPress availability checks.
