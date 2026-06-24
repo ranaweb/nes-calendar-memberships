@@ -1,0 +1,44 @@
+.nescm-checkout-notice {
+	border-left: 4px solid #2271b1;
+	background: #f6f7f7;
+	padding: 12px 16px;
+	margin: 0 0 18px;
+}
+
+.nescm-checkout-notice p {
+	margin: 0 0 8px;
+}
+
+.nescm-checkout-notice p:last-child {
+	margin-bottom: 0;
+}
+
+.nescm-membership-summary {
+	display: grid;
+	gap: 10px;
+	max-width: 560px;
+}
+
+.nescm-summary-row {
+	display: grid;
+	grid-template-columns: minmax(120px, 180px) 1fr;
+	gap: 12px;
+	align-items: baseline;
+}
+
+.nescm-summary-row span {
+	color: #555;
+}
+
+.nescm-auto-renew-cta {
+	margin-top: 16px;
+}
+
+.nescm-button {
+	display: inline-block;
+	padding: 10px 14px;
+	border-radius: 4px;
+	text-decoration: none;
+	background: #1f6f8b;
+	color: #fff;
+}

@@ -1,0 +1,10 @@
+{
+  "name": "nes-calendar-memberships",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Calendar-year membership extension for NES MemberPress memberships.",
+  "scripts": {
+    "check": "node qa/check-release.js"
+  },
+  "license": "GPL-2.0-or-later"
+}

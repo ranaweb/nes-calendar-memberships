@@ -1,0 +1,27 @@
+.nescm-admin .nav-tab-wrapper {
+	margin-bottom: 16px;
+}
+
+.nescm-admin .form-table input.small-text {
+	width: 80px;
+}
+
+.nescm-admin .form-table label {
+	margin-right: 12px;
+}
+
+.nescm-metabox .small-text {
+	width: 90px;
+}
+
+.nescm-checkup-table .nescm-severity-error td:first-child {
+	color: #b32d2e;
+}
+
+.nescm-checkup-table .nescm-severity-warning td:first-child {
+	color: #996800;
+}
+
+.nescm-checkup-table .nescm-severity-notice td:first-child {
+	color: #2271b1;
+}
