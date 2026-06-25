@@ -4,8 +4,12 @@
  *
  * New England Society memberships are presented in respectful, institutional language.
  * This class rewrites MemberPress's own customer-facing wording so members never see
- * consumer/billing terms like "subscription" or "access until". It only touches strings
- * in the `memberpress` text domain; NES plugin strings are written in NES voice directly.
+ * consumer/billing terms like "subscription" or "access until".
+ *
+ * Scope: front-end (member-facing) requests only, and only strings in the `memberpress`
+ * text domain. The MemberPress admin (menus, Memberships, Subscriptions, Transactions,
+ * settings) is intentionally left untouched. NES plugin strings are written in NES voice
+ * directly and are not handled here.
  *
  * @package NES_Calendar_Memberships
  */
@@ -40,6 +44,13 @@ final class NESCM_Terminology {
 	);
 
 	public function hooks(): void {
+		// NES voice applies to member-facing (front-end) output only. The MemberPress
+		// admin — menus, Memberships, Subscriptions, Transactions, settings — is left
+		// exactly as MemberPress ships it.
+		if ( is_admin() ) {
+			return;
+		}
+
 		add_filter( 'gettext', array( $this, 'filter' ), 20, 3 );
 		add_filter( 'gettext_with_context', array( $this, 'filter_with_context' ), 20, 4 );
 		add_filter( 'ngettext', array( $this, 'filter_plural' ), 20, 5 );
