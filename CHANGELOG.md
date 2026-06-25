@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.2 - 2026-06-25
+
+- Adopted institutional New England Society membership language across member-facing strings: no "subscription" wording, and "valid through" replaces "access until"/"expires".
+- Added a terminology layer that rewrites MemberPress's own customer-facing wording (e.g. "Subscription" → "Membership", "access until" → "valid through") so it matches NES voice at checkout, in the account area, and in emails.
+- Renamed the membership metabox "Sales Window" field to "Enrollment Period" (label only; stored data unchanged).
+- Added a **Membership Types** admin screen so new membership families can be added without editing the plugin. The family key is auto-generated from the name and locked after creation; built-in families cannot be removed and a type in use cannot be deleted.
+- `nescm_get_families()` now reads built-in defaults plus admin-managed custom types, with a new `nescm_families` filter.
+- Added a **How To** settings tab with a quick reference for the NES team (approving offline payments, creating memberships, generating years).
+- Fixed: completing an offline payment no longer overwrites the transaction's original `created_at`; the payment-received date is stored as `_nescm_payment_received_date` metadata instead.
+- Hardened the manual-renewal calculation preview against unescaped admin-set values.
+- Clarified the "Cheque/Zelle Checkout Message" setting (formerly "Manual Payment Access") to make clear it only changes checkout wording.
+- Corrected plugin/author header URLs, fixed the Checkup settings-validation copy and added renewal-date validation, replaced `current_time('timestamp')` with `time()`, removed unused code, and added missing translator comments.
+
 ## 1.0.1 - 2026-06-24
 
 - Added `NES_MEMBERSHIP_TEST_DATE` and admin test-date override support.

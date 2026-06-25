@@ -273,12 +273,13 @@ final class NESCM_Settings {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><?php esc_html_e( 'Manual Payment Access', 'nes-calendar-memberships' ); ?></th>
+					<th scope="row"><?php esc_html_e( 'Cheque/Zelle Checkout Message', 'nes-calendar-memberships' ); ?></th>
 					<td>
 						<select name="nescm_settings[manual_payment_access_mode]">
-							<option value="pending_until_complete" <?php selected( $settings['manual_payment_access_mode'], 'pending_until_complete' ); ?>><?php esc_html_e( 'Pending until complete', 'nes-calendar-memberships' ); ?></option>
-							<option value="access_immediately" <?php selected( $settings['manual_payment_access_mode'], 'access_immediately' ); ?>><?php esc_html_e( 'Access immediately', 'nes-calendar-memberships' ); ?></option>
+							<option value="pending_until_complete" <?php selected( $settings['manual_payment_access_mode'], 'pending_until_complete' ); ?>><?php esc_html_e( 'Tell members their renewal completes after NES records payment', 'nes-calendar-memberships' ); ?></option>
+							<option value="access_immediately" <?php selected( $settings['manual_payment_access_mode'], 'access_immediately' ); ?>><?php esc_html_e( 'Do not show a pending-payment message', 'nes-calendar-memberships' ); ?></option>
 						</select>
+						<p class="description"><?php esc_html_e( 'Controls the wording members see at checkout only. It does not change when membership access is granted — offline payments are always activated by NES from the Offline Payments tab.', 'nes-calendar-memberships' ); ?></p>
 					</td>
 				</tr>
 				<tr>
@@ -301,5 +302,9 @@ final class NESCM_Settings {
 			<?php submit_button( __( 'Save Settings', 'nes-calendar-memberships' ) ); ?>
 		</form>
 		<?php
+	}
+
+	public function render_help_tab(): void {
+		echo nescm_render_template( 'admin-howto.php' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Template escapes its own output.
 	}
 }

@@ -91,7 +91,7 @@ final class NESCM_Membership_Meta {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><?php esc_html_e( 'Sales Window', 'nes-calendar-memberships' ); ?></th>
+				<th scope="row"><?php esc_html_e( 'Enrollment Period', 'nes-calendar-memberships' ); ?></th>
 				<td>
 					<label><?php esc_html_e( 'Start', 'nes-calendar-memberships' ); ?> <input type="date" name="nescm_meta[_nescm_sales_window_start]" value="<?php echo esc_attr( $values['_nescm_sales_window_start'] ); ?>" /></label>
 					<label><?php esc_html_e( 'End', 'nes-calendar-memberships' ); ?> <input type="date" name="nescm_meta[_nescm_sales_window_end]" value="<?php echo esc_attr( $values['_nescm_sales_window_end'] ); ?>" /></label>
@@ -248,6 +248,7 @@ final class NESCM_Membership_Meta {
 				if ( nescm_parse_date( $date ) ) {
 					$data[ $date_key ] = $date;
 				} else {
+					/* translators: %s: the meta field key whose date was invalid. */
 					nescm_add_admin_notice( sprintf( __( 'Invalid date for %s. The invalid date was not saved.', 'nes-calendar-memberships' ), $date_key ), 'error' );
 				}
 			}

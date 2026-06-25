@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php
 		if ( $immediate ) {
 			printf(
+				/* translators: 1: membership year, 2: membership name, 3: valid-through date. */
 				esc_html__( 'You are purchasing your %1$d %2$s. Your membership is active immediately and valid through %3$s.', 'nes-calendar-memberships' ),
 				(int) $year,
 				esc_html( $label ),
@@ -21,6 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			);
 		} else {
 			printf(
+				/* translators: 1: membership year, 2: membership name, 3: valid-through date. */
 				esc_html__( 'You are purchasing your %1$d %2$s. This membership is valid through %3$s.', 'nes-calendar-memberships' ),
 				(int) $year,
 				esc_html( $label ),

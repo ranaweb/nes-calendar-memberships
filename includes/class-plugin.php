@@ -13,9 +13,11 @@ final class NESCM_Plugin {
 	private static ?NESCM_Plugin $instance = null;
 
 	public NESCM_MemberPress_Adapter $adapter;
+	public NESCM_Terminology $terminology;
 	public NESCM_Settings $settings;
 	public NESCM_Year_Calculator $calculator;
 	public NESCM_Membership_Meta $membership_meta;
+	public NESCM_Membership_Types $membership_types;
 	public NESCM_Renewal_Router $renewal_router;
 	public NESCM_Checkout_Messaging $checkout_messaging;
 	public NESCM_Transaction_Sync $transaction_sync;
@@ -49,9 +51,11 @@ final class NESCM_Plugin {
 
 	public function init(): void {
 		$this->adapter              = new NESCM_MemberPress_Adapter();
+		$this->terminology          = new NESCM_Terminology();
 		$this->settings             = new NESCM_Settings( $this->adapter );
 		$this->calculator           = new NESCM_Year_Calculator( $this->settings );
 		$this->membership_meta      = new NESCM_Membership_Meta( $this->adapter, $this->calculator );
+		$this->membership_types     = new NESCM_Membership_Types( $this->adapter );
 		$this->renewal_router       = new NESCM_Renewal_Router( $this->adapter, $this->settings, $this->calculator );
 		$this->checkout_messaging   = new NESCM_Checkout_Messaging( $this->adapter, $this->settings, $this->calculator );
 		$this->transaction_sync     = new NESCM_Transaction_Sync( $this->adapter );
@@ -61,15 +65,19 @@ final class NESCM_Plugin {
 		$this->validator            = new NESCM_Validator( $this->adapter, $this->settings, $this->calculator );
 
 		$this->settings->register_tab( 'settings', __( 'Settings', 'nes-calendar-memberships' ), array( $this->settings, 'render_settings_tab' ) );
+		$this->settings->register_tab( 'membership-types', __( 'Membership Types', 'nes-calendar-memberships' ), array( $this->membership_types, 'render_tab' ) );
 		$this->settings->register_tab( 'manual-renewal', __( 'Offline Payments / Manual Renewals', 'nes-calendar-memberships' ), array( $this->manual_renewal, 'render_tab' ) );
 		$this->settings->register_tab( 'generate-year', __( 'Generate Year', 'nes-calendar-memberships' ), array( $this->year_generator, 'render_tab' ) );
 		$this->settings->register_tab( 'checkup', __( 'Checkup', 'nes-calendar-memberships' ), array( $this->validator, 'render_tab' ) );
+		$this->settings->register_tab( 'how-to', __( 'How To', 'nes-calendar-memberships' ), array( $this->settings, 'render_help_tab' ) );
 
 		add_action( 'admin_notices', 'nescm_render_admin_notices' );
 		add_action( 'admin_notices', array( $this, 'memberpress_missing_notice' ) );
 
+		$this->terminology->hooks();
 		$this->settings->hooks();
 		$this->membership_meta->hooks();
+		$this->membership_types->hooks();
 		$this->renewal_router->hooks();
 		$this->checkout_messaging->hooks();
 		$this->transaction_sync->hooks();

@@ -398,6 +398,13 @@ final class NESCM_MemberPress_Adapter {
 				return new WP_Error( 'transaction_not_pending', __( 'Only pending transactions can be completed from this screen.', 'nes-calendar-memberships' ) );
 			}
 
+			// Record the payment-received date as NES metadata. We intentionally do NOT
+			// overwrite the transaction's created_at here: that timestamp is the original
+			// purchase/checkout time and rewriting it distorts MemberPress reporting.
+			if ( nescm_parse_date( $payment_date ) ) {
+				$meta['_nescm_payment_received_date'] = $payment_date;
+			}
+
 			foreach ( $meta as $key => $value ) {
 				$txn->update_meta( $key, $value );
 			}
@@ -405,7 +412,6 @@ final class NESCM_MemberPress_Adapter {
 			$txn->product_id = $target_membership_id;
 			$txn->status     = MeprTransaction::$complete_str;
 			$txn->expires_at = $this->mysql_datetime( $expires_at . ' 23:59:59' );
-			$txn->created_at = $this->mysql_datetime( $payment_date . ' 12:00:00' );
 			$txn->store();
 
 			foreach ( $meta as $key => $value ) {

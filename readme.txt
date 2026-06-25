@@ -4,7 +4,7 @@ Tags: memberpress, memberships, renewals
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,15 @@ This plugin does not replace MemberPress, process payments, store cards, or impl
 5. Configure settings, tag memberships, and run Checkup.
 
 == Changelog ==
+
+= 1.0.2 =
+* Adopted New England Society membership language across member-facing text (no "subscription"; uses "valid through" instead of "access until"/"expires"), including a layer that adjusts MemberPress's own wording.
+* Renamed the "Sales Window" field to "Enrollment Period".
+* Added a Membership Types screen so new membership families can be added without code changes.
+* Added a How To reference tab for the NES team.
+* Offline payment completion no longer overwrites the transaction's original created date.
+* Hardened the manual renewal preview and clarified the Cheque/Zelle checkout message setting.
+* Various validation, escaping, and metadata fixes.
 
 = 1.0.1 =
 * Added test date override support.

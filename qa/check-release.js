@@ -19,10 +19,14 @@ const main = read(mainPath);
 const readme = read(readmePath);
 const pkg = JSON.parse(read(packagePath));
 
+// package.json is the single source of truth for the version.
+const version = pkg.version;
+const versionPattern = version.replace(/\./g, '\\.');
+
 const checks = [
-  ['main version', /Version:\s*1\.0\.1/.test(main)],
-  ['readme stable tag', /Stable tag:\s*1\.0\.1/.test(readme)],
-  ['package version', pkg.version === '1.0.1'],
+  ['main header version', new RegExp(`Version:\\s*${versionPattern}\\b`).test(main)],
+  ['main NESCM_VERSION constant', new RegExp(`NESCM_VERSION',\\s*'${versionPattern}'`).test(main)],
+  ['readme stable tag', new RegExp(`Stable tag:\\s*${versionPattern}\\b`).test(readme)],
   ['author', /Author:\s*Cider House/.test(main)],
   ['requires php', /Requires PHP:\s*8\.1/.test(main) && /Requires PHP:\s*8\.1/.test(readme)],
   ['tested up to', /Tested up to:\s*7\.0/.test(main) && /Tested up to:\s*7\.0/.test(readme)],
@@ -30,16 +34,18 @@ const checks = [
 ];
 
 for (const [name, ok] of checks) {
-  if (!ok) fail(`Release metadata check failed: ${name}`);
+  if (!ok) fail(`Release metadata check failed: ${name} (expected version ${version})`);
 }
 
 const requiredFiles = [
   'nes-calendar-memberships.php',
   'includes/class-plugin.php',
   'includes/class-memberpress-adapter.php',
+  'includes/class-terminology.php',
   'includes/class-settings.php',
   'includes/class-year-calculator.php',
   'includes/class-membership-meta.php',
+  'includes/class-membership-types.php',
   'includes/class-renewal-router.php',
   'includes/class-checkout-messaging.php',
   'includes/class-transaction-sync.php',
@@ -47,6 +53,8 @@ const requiredFiles = [
   'includes/class-admin-manual-renewal.php',
   'includes/class-year-generator.php',
   'includes/class-validator.php',
+  'templates/admin-howto.php',
+  'templates/admin-membership-types.php',
   'README.md',
   'readme.txt',
   'LICENSE',
@@ -60,5 +68,5 @@ for (const rel of requiredFiles) {
 }
 
 if (!process.exitCode) {
-  console.log('Release metadata checks passed.');
+  console.log(`Release metadata checks passed for version ${version}.`);
 }

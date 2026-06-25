@@ -41,12 +41,18 @@ final class NESCM_Validator {
 
 		$active_test_date = $this->settings->active_test_date();
 		if ( ! empty( $active_test_date['date'] ) ) {
-			$items[] = $this->item( 'warning', __( 'Test Date Override', 'nes-calendar-memberships' ), sprintf( __( 'Test date override is active: %s.', 'nes-calendar-memberships' ), $active_test_date['date'] ), __( 'Remove the constant or clear the setting before production launch.', 'nes-calendar-memberships' ) );
+			/* translators: %s: the active test date. */
+			$test_date_problem = sprintf( __( 'Test date override is active: %s.', 'nes-calendar-memberships' ), $active_test_date['date'] );
+			$items[]           = $this->item( 'warning', __( 'Test Date Override', 'nes-calendar-memberships' ), $test_date_problem, __( 'Remove the constant or clear the setting before production launch.', 'nes-calendar-memberships' ) );
 		}
 
 		$settings = $this->settings->all();
 		if ( ! checkdate( (int) $settings['cutoff_month'], (int) $settings['cutoff_day'], 2026 ) ) {
-			$items[] = $this->item( 'error', __( 'Settings', 'nes-calendar-memberships' ), __( 'Invalid next-year renewal start date.', 'nes-calendar-memberships' ), __( 'Review the NES Calendar Memberships settings.', 'nes-calendar-memberships' ) );
+			$items[] = $this->item( 'error', __( 'Settings', 'nes-calendar-memberships' ), __( 'Invalid annual cutoff date.', 'nes-calendar-memberships' ), __( 'Review the annual cutoff date in the NES Calendar Memberships settings.', 'nes-calendar-memberships' ) );
+		}
+
+		if ( ! checkdate( (int) $settings['renewal_month'], (int) $settings['renewal_day'], 2026 ) ) {
+			$items[] = $this->item( 'error', __( 'Settings', 'nes-calendar-memberships' ), __( 'Invalid renewal display date.', 'nes-calendar-memberships' ), __( 'Review the renewal display date in the NES Calendar Memberships settings.', 'nes-calendar-memberships' ) );
 		}
 
 		if ( 'yes' === $settings['enable_auto_renew_cta'] && empty( $settings['auto_renew_cta_url'] ) ) {
@@ -84,7 +90,9 @@ final class NESCM_Validator {
 			if ( 'manual' === $method && $family && $year ) {
 				$key = $family . ':' . $year;
 				if ( isset( $seen[ $key ] ) ) {
-					$items[] = $this->item( 'error', $title, sprintf( __( 'Duplicate manual membership for %s.', 'nes-calendar-memberships' ), $key ), __( 'Keep only one manual membership per family/year.', 'nes-calendar-memberships' ) );
+					/* translators: %s: family:year identifier. */
+					$duplicate_problem = sprintf( __( 'Duplicate manual membership for %s.', 'nes-calendar-memberships' ), $key );
+					$items[]           = $this->item( 'error', $title, $duplicate_problem, __( 'Keep only one manual membership per family/year.', 'nes-calendar-memberships' ) );
 				}
 				$seen[ $key ] = true;
 			}
@@ -95,7 +103,9 @@ final class NESCM_Validator {
 
 			$fixed = $this->adapter->product_fixed_expiration( $post_id );
 			if ( 'manual' === $method && $through && $fixed && $fixed !== $through ) {
-				$items[] = $this->item( 'warning', $title, sprintf( __( 'NES valid-through date (%1$s) does not match MemberPress fixed expiration (%2$s).', 'nes-calendar-memberships' ), $through, $fixed ), __( 'Save the membership again or update the MemberPress expiration date.', 'nes-calendar-memberships' ) );
+				/* translators: 1: NES valid-through date, 2: MemberPress fixed expiration date. */
+				$mismatch_problem = sprintf( __( 'NES valid-through date (%1$s) does not match MemberPress fixed expiration (%2$s).', 'nes-calendar-memberships' ), $through, $fixed );
+				$items[]          = $this->item( 'warning', $title, $mismatch_problem, __( 'Save the membership again or update the MemberPress expiration date.', 'nes-calendar-memberships' ) );
 			}
 		}
 
@@ -127,7 +137,9 @@ final class NESCM_Validator {
 			$year      = $this->calculator->get_membership_year_for_date( $parsed );
 			$target_id = $this->adapter->find_membership( $family, $year, 'manual' );
 			if ( ! $target_id ) {
-				$items[] = $this->item( 'error', '#' . (int) $pending->id, sprintf( __( 'Pending offline payment cannot find target membership for %1$s %2$d.', 'nes-calendar-memberships' ), $family, $year ), __( 'Create/publish the target year-specific membership before completing the payment.', 'nes-calendar-memberships' ) );
+				/* translators: 1: family key, 2: membership year. */
+				$pending_problem = sprintf( __( 'Pending offline payment cannot find target membership for %1$s %2$d.', 'nes-calendar-memberships' ), $family, $year );
+				$items[]         = $this->item( 'error', '#' . (int) $pending->id, $pending_problem, __( 'Create/publish the target year-specific membership before completing the payment.', 'nes-calendar-memberships' ) );
 			}
 		}
 
