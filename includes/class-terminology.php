@@ -27,6 +27,10 @@ final class NESCM_Terminology {
 	 * is handled before "Subscription".
 	 */
 	private const REPLACEMENTS = array(
+		// More specific phrases first so "for access until" reads cleanly (e.g. the price string
+		// "$140 for access until December 31, 2026" becomes "$140 — valid through December 31, 2026").
+		'for access until' => '— valid through',
+		'For access until' => '— Valid through',
 		'access until' => 'valid through',
 		'Access until' => 'Valid through',
 		'Subscriptions' => 'Memberships',
