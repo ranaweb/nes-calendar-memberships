@@ -9,17 +9,60 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-function nescm_get_families(): array {
+/**
+ * Built-in membership families that ship with the plugin and cannot be deleted.
+ */
+function nescm_get_default_families(): array {
 	return array(
-		'resident'           => __( 'Resident Membership', 'nes-calendar-memberships' ),
-		'joint_resident'     => __( 'Joint Resident Membership', 'nes-calendar-memberships' ),
-		'junior'             => __( 'Junior Membership', 'nes-calendar-memberships' ),
-		'nonresident'        => __( 'Nonresident Membership', 'nes-calendar-memberships' ),
-		'pilgrim_individual' => __( 'Pilgrim Circle Individual', 'nes-calendar-memberships' ),
-		'pilgrim_joint'      => __( 'Pilgrim Circle Joint', 'nes-calendar-memberships' ),
-		'firewood_individual'=> __( 'Firewood Circle Individual', 'nes-calendar-memberships' ),
-		'firewood_joint'     => __( 'Firewood Circle Joint', 'nes-calendar-memberships' ),
+		'resident'            => __( 'Resident Membership', 'nes-calendar-memberships' ),
+		'joint_resident'      => __( 'Joint Resident Membership', 'nes-calendar-memberships' ),
+		'junior'              => __( 'Junior Membership', 'nes-calendar-memberships' ),
+		'nonresident'         => __( 'Nonresident Membership', 'nes-calendar-memberships' ),
+		'pilgrim_individual'  => __( 'Pilgrim Circle Individual', 'nes-calendar-memberships' ),
+		'pilgrim_joint'       => __( 'Pilgrim Circle Joint', 'nes-calendar-memberships' ),
+		'firewood_individual' => __( 'Firewood Circle Individual', 'nes-calendar-memberships' ),
+		'firewood_joint'      => __( 'Firewood Circle Joint', 'nes-calendar-memberships' ),
 	);
+}
+
+/**
+ * Custom membership families added by an administrator via the Membership Types screen.
+ */
+function nescm_get_custom_families(): array {
+	$stored = get_option( NESCM_FAMILIES_OPTION, array() );
+	if ( ! is_array( $stored ) ) {
+		return array();
+	}
+
+	$families = array();
+	foreach ( $stored as $key => $label ) {
+		$key = sanitize_key( (string) $key );
+		if ( '' === $key ) {
+			continue;
+		}
+		$families[ $key ] = sanitize_text_field( (string) $label );
+	}
+
+	return $families;
+}
+
+/**
+ * All membership families: built-in defaults plus admin-managed custom types.
+ *
+ * Built-in keys win over custom keys with the same slug. Developers may adjust the
+ * list with the `nescm_families` filter.
+ */
+function nescm_get_families(): array {
+	$families = array_merge( nescm_get_custom_families(), nescm_get_default_families() );
+
+	/**
+	 * Filters the full list of NES membership families (key => label).
+	 *
+	 * @param array $families Map of family key to display label.
+	 */
+	$families = apply_filters( 'nescm_families', $families );
+
+	return is_array( $families ) ? $families : nescm_get_default_families();
 }
 
 function nescm_get_renewal_method_types(): array {
@@ -144,17 +187,10 @@ function nescm_render_template( string $template, array $vars = array() ): strin
 	}
 
 	ob_start();
+	// phpcs:ignore WordPress.PHP.DontExtract.extract_extract -- Controlled template rendering: keys are plugin-defined template variables, not request data.
 	extract( $vars, EXTR_SKIP );
 	include $file;
 	return (string) ob_get_clean();
-}
-
-function nescm_current_request_url(): string {
-	$scheme = is_ssl() ? 'https://' : 'http://';
-	$host   = isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '';
-	$uri    = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-
-	return esc_url_raw( $scheme . $host . $uri );
 }
 
 function nescm_admin_page_url( string $tab = 'settings' ): string {

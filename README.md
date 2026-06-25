@@ -13,6 +13,9 @@ NES Calendar Memberships is a focused MemberPress extension for NES calendar-yea
 - Adds an admin helper for cheque, Zelle, and other offline renewals.
 - Adds a read-only checkup screen for configuration issues.
 - Adds a conservative next-year membership generator.
+- Lets administrators add new membership types (families) without code, from a Membership Types screen.
+- Adds a How To reference tab for the NES team.
+- Presents memberships in NES institutional language and adjusts MemberPress's own customer-facing wording to match.
 
 ## What It Does Not Do
 
@@ -77,6 +80,10 @@ If MemberPress changes these internals, update `includes/class-memberpress-adapt
 - `pilgrim_joint`
 - `firewood_individual`
 - `firewood_joint`
+
+Additional membership types can be added under `MemberPress > NES Calendar Memberships > Membership Types`.
+The family key is generated from the type name and is permanent once saved (renewal links depend on it).
+Built-in families cannot be removed, and a type that still has membership products assigned cannot be deleted.
 
 ## Renewal Routing
 
