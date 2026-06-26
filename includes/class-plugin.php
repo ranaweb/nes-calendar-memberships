@@ -59,7 +59,7 @@ final class NESCM_Plugin {
 		$this->renewal_router       = new NESCM_Renewal_Router( $this->adapter, $this->settings, $this->calculator );
 		$this->checkout_messaging   = new NESCM_Checkout_Messaging( $this->adapter, $this->settings, $this->calculator );
 		$this->transaction_sync     = new NESCM_Transaction_Sync( $this->adapter );
-		$this->dashboard_shortcodes = new NESCM_Dashboard_Shortcodes( $this->adapter, $this->settings );
+		$this->dashboard_shortcodes = new NESCM_Dashboard_Shortcodes( $this->adapter, $this->settings, $this->calculator );
 		$this->manual_renewal       = new NESCM_Admin_Manual_Renewal( $this->adapter, $this->settings, $this->calculator );
 		$this->year_generator       = new NESCM_Year_Generator( $this->adapter, $this->settings, $this->calculator );
 		$this->validator            = new NESCM_Validator( $this->adapter, $this->settings, $this->calculator );

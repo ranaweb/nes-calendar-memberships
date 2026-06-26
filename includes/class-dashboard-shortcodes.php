@@ -12,10 +12,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class NESCM_Dashboard_Shortcodes {
 	private NESCM_MemberPress_Adapter $adapter;
 	private NESCM_Settings $settings;
+	private NESCM_Year_Calculator $calculator;
 
-	public function __construct( NESCM_MemberPress_Adapter $adapter, NESCM_Settings $settings ) {
-		$this->adapter  = $adapter;
-		$this->settings = $settings;
+	public function __construct( NESCM_MemberPress_Adapter $adapter, NESCM_Settings $settings, NESCM_Year_Calculator $calculator ) {
+		$this->adapter    = $adapter;
+		$this->settings   = $settings;
+		$this->calculator = $calculator;
 	}
 
 	public function hooks(): void {
@@ -24,6 +26,7 @@ final class NESCM_Dashboard_Shortcodes {
 		add_shortcode( 'nescm_membership_expiration', array( $this, 'membership_expiration' ) );
 		add_shortcode( 'nescm_renewal_method', array( $this, 'renewal_method' ) );
 		add_shortcode( 'nescm_auto_renew_cta', array( $this, 'auto_renew_cta' ) );
+		add_shortcode( 'nescm_renew_cta', array( $this, 'renew_cta' ) );
 		add_shortcode( 'nescm_membership_summary', array( $this, 'membership_summary' ) );
 	}
 
@@ -67,6 +70,56 @@ final class NESCM_Dashboard_Shortcodes {
 		if ( ! $url ) {
 			return '';
 		}
+
+		return nescm_render_template(
+			'dashboard-auto-renew-cta.php',
+			array(
+				'url'    => $url,
+				'button' => $button,
+				'text'   => $text,
+			)
+		);
+	}
+
+	/**
+	 * Early-renewal call to action for non-recurring (yearly) members.
+	 *
+	 * Once the next membership year is available to purchase (after the annual cutoff),
+	 * or the current membership has expired, this shows a "Renew now for <year>" button
+	 * that routes the member to the correct year's checkout. Recurring members renew
+	 * automatically, so they never see this.
+	 */
+	public function renew_cta(): string {
+		$summary = $this->summary();
+
+		if ( 'auto_renew' === $summary['renewal_method'] || 'pending' === $summary['status'] || '' === $summary['family_key'] ) {
+			return '';
+		}
+
+		if ( ! $this->adapter->is_active() ) {
+			return '';
+		}
+
+		$member_year = (int) $summary['year'];
+		$target_year = $this->calculator->get_membership_year_for_date( $this->calculator->today() );
+
+		// Only prompt once a newer year is available to buy, or the membership has expired.
+		if ( $target_year <= $member_year && 'expired' !== $summary['status'] ) {
+			return '';
+		}
+
+		$target_id = $this->adapter->find_membership( $summary['family_key'], $target_year, 'manual' );
+		if ( ! $target_id || ! $this->adapter->is_published_membership( $target_id ) ) {
+			return '';
+		}
+
+		$url           = add_query_arg( 'family', rawurlencode( $summary['family_key'] ), home_url( '/membership-renew/' ) );
+		$valid_through = wp_date( 'F j, Y', strtotime( $target_year . '-12-31' ), wp_timezone() );
+
+		/* translators: %d: the membership year now available to renew into. */
+		$button = sprintf( __( 'Renew now for %d', 'nes-calendar-memberships' ), $target_year );
+		/* translators: %s: the date the renewed membership is valid through. */
+		$text = sprintf( __( 'Your membership for the new year is available. Renew now to stay active through %s.', 'nes-calendar-memberships' ), $valid_through );
 
 		return nescm_render_template(
 			'dashboard-auto-renew-cta.php',
@@ -138,15 +191,15 @@ final class NESCM_Dashboard_Shortcodes {
 
 		$expiration_label = '';
 		if ( 'pending' === $status ) {
-			$expiration_label = __( 'Your membership renewal will be confirmed once NES receives and records your cheque or Zelle payment.', 'nes-calendar-memberships' );
+			$expiration_label = __( 'Your membership renewal will be confirmed once NES receives and records your check or Zelle payment.', 'nes-calendar-memberships' );
 		} elseif ( $expires_at && '0000-00-00 00:00:00' !== $expires_at ) {
 			$date = wp_date( 'F j, Y', strtotime( $expires_at ), wp_timezone() );
 			if ( 'auto_renew' === $method ) {
-				/* translators: %s: formatted date the membership is valid through. */
-				$expiration_label = sprintf( __( 'Membership valid through %s', 'nes-calendar-memberships' ), $date );
+				/* translators: %s: formatted date the membership renews. */
+				$expiration_label = sprintf( __( 'Renews %s', 'nes-calendar-memberships' ), $date );
 			} else {
-				/* translators: %s: formatted date the membership is valid through. */
-				$expiration_label = sprintf( __( 'Valid through %s', 'nes-calendar-memberships' ), $date );
+				/* translators: %s: formatted date the membership expires. */
+				$expiration_label = sprintf( __( 'Expires %s', 'nes-calendar-memberships' ), $date );
 			}
 		}
 

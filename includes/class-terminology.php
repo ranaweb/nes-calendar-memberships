@@ -74,6 +74,8 @@ final class NESCM_Terminology {
 	}
 
 	/**
+	 * Applies NES terminology to a context-aware MemberPress translation.
+	 *
 	 * @param mixed  $translation Translated text.
 	 * @param mixed  $text        Original text (unused).
 	 * @param mixed  $context     Gettext context (unused).
@@ -85,6 +87,8 @@ final class NESCM_Terminology {
 	}
 
 	/**
+	 * Applies NES terminology to a pluralized MemberPress translation.
+	 *
 	 * @param mixed  $translation Selected singular/plural translation.
 	 * @param mixed  $single      Singular source (unused).
 	 * @param mixed  $plural      Plural source (unused).

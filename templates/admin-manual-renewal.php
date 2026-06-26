@@ -15,7 +15,7 @@ $values = wp_parse_args(
 		'user'              => '',
 		'family'            => '',
 		'payment_date'      => wp_date( 'Y-m-d', null, wp_timezone() ),
-		'payment_method'    => 'cheque',
+		'payment_method'    => 'check',
 		'amount'            => '',
 		'reference'         => '',
 		'note'              => '',
@@ -33,7 +33,7 @@ $preview_config = array(
 );
 ?>
 <h2><?php esc_html_e( 'Pending Offline Payments', 'nes-calendar-memberships' ); ?></h2>
-<p><?php esc_html_e( 'Review pending cheque/Zelle/offline MemberPress transactions for NES memberships, then complete and activate them when payment has been received.', 'nes-calendar-memberships' ); ?></p>
+<p><?php esc_html_e( 'Review pending check/Zelle/offline MemberPress transactions for NES memberships, then complete and activate them when payment has been received.', 'nes-calendar-memberships' ); ?></p>
 
 <?php if ( ! empty( $review ) ) : ?>
 	<div class="nescm-review-panel">
@@ -155,7 +155,7 @@ $preview_config = array(
 <hr />
 
 <h2><?php esc_html_e( 'Create Manual Renewal Manually', 'nes-calendar-memberships' ); ?></h2>
-<p><?php esc_html_e( 'Use this only if the member did not complete an online cheque/Zelle checkout and you need to record a payment received outside the website.', 'nes-calendar-memberships' ); ?></p>
+<p><?php esc_html_e( 'Use this only if the member did not complete an online check/Zelle checkout and you need to record a payment received outside the website.', 'nes-calendar-memberships' ); ?></p>
 
 <?php if ( ! empty( $pending['preview'] ) ) : ?>
 	<div class="notice notice-warning inline">
@@ -197,7 +197,7 @@ $preview_config = array(
 			<th scope="row"><?php esc_html_e( 'Payment Method', 'nes-calendar-memberships' ); ?></th>
 			<td>
 				<select name="nescm_manual[payment_method]">
-					<option value="cheque" <?php selected( $values['payment_method'], 'cheque' ); ?>><?php esc_html_e( 'Cheque', 'nes-calendar-memberships' ); ?></option>
+					<option value="check" <?php selected( $values['payment_method'], 'check' ); ?>><?php esc_html_e( 'Check', 'nes-calendar-memberships' ); ?></option>
 					<option value="zelle" <?php selected( $values['payment_method'], 'zelle' ); ?>><?php esc_html_e( 'Zelle', 'nes-calendar-memberships' ); ?></option>
 					<option value="other" <?php selected( $values['payment_method'], 'other' ); ?>><?php esc_html_e( 'Other offline', 'nes-calendar-memberships' ); ?></option>
 				</select>

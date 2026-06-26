@@ -10,7 +10,7 @@ NES Calendar Memberships is a focused MemberPress extension for NES calendar-yea
 - Shows clear checkout notices with membership year and December 31 expiration.
 - Records NES transaction metadata when MemberPress transactions are stored.
 - Provides dashboard shortcodes for membership level, status, expiration, renewal method, CTA, and summary.
-- Adds an admin helper for cheque, Zelle, and other offline renewals.
+- Adds an admin helper for check, Zelle, and other offline renewals.
 - Adds a read-only checkup screen for configuration issues.
 - Adds a conservative next-year membership generator.
 - Lets administrators add new membership types (families) without code, from a Membership Types screen.
@@ -110,18 +110,24 @@ The router calculates the target membership year from the current date and confi
 [nescm_membership_expiration]
 [nescm_renewal_method]
 [nescm_auto_renew_cta]
+[nescm_renew_cta]
 [nescm_membership_summary]
 ```
 
-Manual memberships use `Expires`. The plugin only uses automatic-renewal wording when it can detect an active MemberPress subscription.
+Yearly (one-time) memberships show `Expires <date>`; recurring memberships show `Renews <date>`. The plugin
+only uses recurring wording when it can detect an active MemberPress subscription.
+
+`[nescm_renew_cta]` shows a "Renew now for <year>" button to a yearly member once the next membership year
+is available to purchase (after the annual cutoff) or once their membership has expired. Recurring members
+never see it, since they renew automatically.
 
 ## Offline Payments / Manual Renewals
 
 Use `MemberPress > NES Calendar Memberships > Offline Payments / Manual Renewals`.
 
-The primary workflow is reviewing pending cheque/Zelle/offline MemberPress transactions. The screen shows pending NES transactions, calculates the target membership year from the payment received date and annual cutoff, then lets an admin complete and activate the transaction or cancel/void it.
+The primary workflow is reviewing pending check/Zelle/offline MemberPress transactions. The screen shows pending NES transactions, calculates the target membership year from the payment received date and annual cutoff, then lets an admin complete and activate the transaction or cancel/void it.
 
-The secondary workflow is `Create Manual Renewal Manually`. Use it only if the member did not complete an online cheque/Zelle checkout and you need to record a payment received outside the website.
+The secondary workflow is `Create Manual Renewal Manually`. Use it only if the member did not complete an online check/Zelle checkout and you need to record a payment received outside the website.
 
 The default action creates a pending manual renewal. Admins may choose completed renewal when recording money already received.
 

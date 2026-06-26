@@ -32,6 +32,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 	</p>
 	<?php if ( $manual_method && $pending_offline ) : ?>
-		<p><?php esc_html_e( 'If you choose Cheque/Zelle payment, your renewal will be completed after NES receives and records your payment.', 'nes-calendar-memberships' ); ?></p>
+		<p><?php esc_html_e( 'If you choose Check/Zelle payment, your renewal will be completed after NES receives and records your payment.', 'nes-calendar-memberships' ); ?></p>
 	<?php endif; ?>
 </div>

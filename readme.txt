@@ -4,7 +4,7 @@ Tags: memberpress, memberships, renewals
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ Calendar-year membership routing, checkout messaging, dashboard helpers, and adm
 
 == Description ==
 
-NES Calendar Memberships is a focused MemberPress extension for calendar-year memberships. It routes renewals to the correct year-specific MemberPress membership, displays clear checkout messaging, provides dashboard shortcodes, helps admins record cheque/Zelle renewals, and validates common configuration issues.
+NES Calendar Memberships is a focused MemberPress extension for calendar-year memberships. It routes renewals to the correct year-specific MemberPress membership, displays clear checkout messaging, provides dashboard shortcodes, helps admins record check/Zelle renewals, and validates common configuration issues.
 
 This plugin does not replace MemberPress, process payments, store cards, or implement custom Stripe billing anchors.
 
@@ -25,6 +25,11 @@ This plugin does not replace MemberPress, process payments, store cards, or impl
 5. Configure settings, tag memberships, and run Checkup.
 
 == Changelog ==
+
+= 1.0.3 =
+* Dashboard now shows "Renews <date>" for recurring memberships and "Expires <date>" for yearly ones.
+* Added a [nescm_renew_cta] shortcode that prompts yearly members to renew once the new year is available.
+* Changed "Cheque" to the American spelling "Check" throughout.
 
 = 1.0.2 =
 * Adopted New England Society membership language across member-facing text (no "subscription"; uses "valid through" instead of "access until"/"expires"), including a layer that adjusts MemberPress's own wording.

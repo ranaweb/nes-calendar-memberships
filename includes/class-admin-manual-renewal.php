@@ -382,7 +382,7 @@ final class NESCM_Admin_Manual_Renewal {
 			return new WP_Error( 'invalid_payment_date', __( 'Payment received date must be a valid date.', 'nes-calendar-memberships' ) );
 		}
 
-		if ( ! in_array( $data['payment_method'], array( 'cheque', 'zelle', 'other' ), true ) ) {
+		if ( ! in_array( $data['payment_method'], array( 'check', 'zelle', 'other' ), true ) ) {
 			return new WP_Error( 'invalid_payment_method', __( 'Select a valid offline payment method.', 'nes-calendar-memberships' ) );
 		}
 

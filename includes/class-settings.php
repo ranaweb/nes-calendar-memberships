@@ -273,7 +273,7 @@ final class NESCM_Settings {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><?php esc_html_e( 'Cheque/Zelle Checkout Message', 'nes-calendar-memberships' ); ?></th>
+					<th scope="row"><?php esc_html_e( 'Check/Zelle Checkout Message', 'nes-calendar-memberships' ); ?></th>
 					<td>
 						<select name="nescm_settings[manual_payment_access_mode]">
 							<option value="pending_until_complete" <?php selected( $settings['manual_payment_access_mode'], 'pending_until_complete' ); ?>><?php esc_html_e( 'Tell members their renewal completes after NES records payment', 'nes-calendar-memberships' ); ?></option>

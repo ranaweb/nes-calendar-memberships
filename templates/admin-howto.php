@@ -13,12 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 <p><?php esc_html_e( 'A quick reference for the NES team. These steps cover the most common membership tasks.', 'nes-calendar-memberships' ); ?></p>
 
 <div class="nescm-howto">
-	<h3><?php esc_html_e( 'Approve an offline (cheque / Zelle) payment', 'nes-calendar-memberships' ); ?></h3>
+	<h3><?php esc_html_e( 'Approve an offline (check / Zelle) payment', 'nes-calendar-memberships' ); ?></h3>
 	<ol>
 		<li><?php esc_html_e( 'Open the Offline Payments / Manual Renewals tab.', 'nes-calendar-memberships' ); ?></li>
 		<li><?php esc_html_e( 'Find the member under Pending Offline Payments and click Review.', 'nes-calendar-memberships' ); ?></li>
 		<li><?php esc_html_e( 'Check the Calculation Preview — membership year, valid-through date, and target membership.', 'nes-calendar-memberships' ); ?></li>
-		<li><?php esc_html_e( 'Confirm the Payment Received Date (the date NES received the cheque or Zelle payment).', 'nes-calendar-memberships' ); ?></li>
+		<li><?php esc_html_e( 'Confirm the Payment Received Date (the date NES received the check or Zelle payment).', 'nes-calendar-memberships' ); ?></li>
 		<li><?php esc_html_e( 'Click Complete & Activate. The membership becomes valid immediately through December 31 of that year.', 'nes-calendar-memberships' ); ?></li>
 		<li><?php esc_html_e( 'If a duplicate warning appears, continue only if a second membership for that year is intended.', 'nes-calendar-memberships' ); ?></li>
 		<li><?php esc_html_e( 'To reject a payment instead, click Cancel / Void.', 'nes-calendar-memberships' ); ?></li>
@@ -45,7 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h3><?php esc_html_e( 'What the settings mean', 'nes-calendar-memberships' ); ?></h3>
 	<ul>
 		<li><?php esc_html_e( 'Annual Cutoff Date — renewals after this date count toward next year.', 'nes-calendar-memberships' ); ?></li>
-		<li><?php esc_html_e( 'Cheque/Zelle Checkout Message — controls the wording members see at checkout (display only).', 'nes-calendar-memberships' ); ?></li>
+		<li><?php esc_html_e( 'Check/Zelle Checkout Message — controls the wording members see at checkout (display only).', 'nes-calendar-memberships' ); ?></li>
 		<li><?php esc_html_e( 'Test Date Override — staging only; must be blank in production.', 'nes-calendar-memberships' ); ?></li>
 	</ul>
 </div>

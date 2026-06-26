@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3 - 2026-06-26
+
+- Dashboard wording now distinguishes the two membership types: recurring memberships show "Renews <date>" and yearly (one-time) memberships show "Expires <date>".
+- Added a `[nescm_renew_cta]` shortcode: once the next membership year is available (after the annual cutoff) or the current membership has expired, yearly members see a "Renew now for <year>" button that routes them to the correct year's checkout. Recurring members never see it.
+- Renamed "Cheque" to the American spelling "Check" throughout member-facing and admin text (and the manual-renewal payment-method value).
+
 ## 1.0.2 - 2026-06-25
 
 - Adopted institutional New England Society membership language across member-facing strings: no "subscription" wording, and "valid through" replaces "access until"/"expires".
