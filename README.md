@@ -114,12 +114,33 @@ The router calculates the target membership year from the current date and confi
 [nescm_membership_summary]
 ```
 
-Yearly (one-time) memberships show `Expires <date>`; recurring memberships show `Renews <date>`. The plugin
-only uses recurring wording when it can detect an active MemberPress subscription.
+Yearly (one-time) memberships show `Expires <date>`; recurring memberships show `Renews <date>` using the
+subscription's next billing date; expired memberships show `Expired on <date>`. The plugin only uses
+recurring wording when it can detect an active MemberPress subscription.
+
+`[nescm_membership_expiration]` supports `part="label"` (just `Renews` / `Expires` / `Expired on`),
+`part="date"` (just the date), and `fallback="—"` for empty states — use these to compose label/value rows
+in Elementor.
 
 `[nescm_renew_cta]` shows a "Renew now for <year>" button to a yearly member once the next membership year
 is available to purchase (after the annual cutoff) or once their membership has expired. Recurring members
-never see it, since they renew automatically.
+never see it, since they renew automatically. Add `href="/renew/"` to send members to a renewal chooser
+page instead of directly to checkout.
+
+`[nescm_renewal_url]` (yearly) and `[nescm_auto_renew_url]` (recurring) output checkout URLs. With no
+`family` attribute they resolve the current member's family — so one renewal chooser page serves every
+membership family.
+
+## Member Access & WooCommerce Integration
+
+- **Dashboard gate** — set the Dashboard Page ID in settings; members (including expired members) can view
+  that page, other logged-in users are redirected to the WooCommerce account page, and logged-out visitors
+  go to the login page.
+- **Login routing** — members land on the dashboard after login; everyone else lands on the shop account
+  page; staff keep the WordPress default. Disable with the `nescm_login_routing_enabled` filter.
+- **WooCommerce** (when active) — members get a "Member Dashboard" item in the account navigation, and the
+  MemberPress member address stays in sync with the WooCommerce billing address in both directions
+  (Settings → Address Sync).
 
 ## Offline Payments / Manual Renewals
 

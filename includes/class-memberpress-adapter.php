@@ -172,6 +172,43 @@ final class NESCM_MemberPress_Adapter {
 		return ! empty( $query->posts ) ? (int) $query->posts[0] : null;
 	}
 
+	/**
+	 * Finds the recurring (auto-renew) membership product for a family.
+	 * Recurring products are year-less, so only family and method are matched.
+	 *
+	 * @param string $family_key NES membership family key.
+	 * @return int|null
+	 */
+	public function find_recurring_membership( string $family_key ): ?int {
+		$query = new WP_Query(
+			array(
+				'post_type'              => $this->get_membership_post_type(),
+				'post_status'            => array( 'publish', 'draft', 'private', 'pending' ),
+				'posts_per_page'         => 1,
+				'fields'                 => 'ids',
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+				'meta_query'             => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'   => '_nescm_enabled',
+						'value' => 'yes',
+					),
+					array(
+						'key'   => '_nescm_family_key',
+						'value' => $family_key,
+					),
+					array(
+						'key'   => '_nescm_renewal_method_type',
+						'value' => 'auto_renew',
+					),
+				),
+			)
+		);
+
+		return ! empty( $query->posts ) ? (int) $query->posts[0] : null;
+	}
+
 	public function query_nes_memberships( array $args = array() ): array {
 		$defaults = array(
 			'post_type'      => $this->get_membership_post_type(),
@@ -298,6 +335,61 @@ final class NESCM_MemberPress_Adapter {
 		);
 
 		return (int) $wpdb->get_var( $sql ) > 0;
+	}
+
+	/**
+	 * Whether the user has any NES membership history (active, pending, or expired).
+	 * Voided/failed transactions do not count.
+	 *
+	 * @param int $user_id WordPress user ID.
+	 * @return bool
+	 */
+	public function user_has_nes_transactions( int $user_id ): bool {
+		global $wpdb;
+
+		if ( ! $this->is_active() || empty( $wpdb->mepr_transactions ) || $user_id <= 0 ) {
+			return false;
+		}
+
+		$product_ids = $this->nes_product_ids();
+		if ( empty( $product_ids ) ) {
+			return false;
+		}
+
+		$placeholders = implode( ',', array_fill( 0, count( $product_ids ), '%d' ) );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $placeholders is a generated list of %d markers; all values go through prepare().
+		$sql = $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->mepr_transactions}
+			WHERE user_id = %d
+			AND product_id IN ($placeholders)
+			AND txn_type = %s
+			AND status IN (%s, %s, %s)",
+			array_merge( array( $user_id ), $product_ids, array( 'payment', 'complete', 'confirmed', 'pending' ) )
+		);
+		// phpcs:enable
+
+		return (int) $wpdb->get_var( $sql ) > 0; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Prepared above.
+	}
+
+	/**
+	 * URL of the MemberPress login page, falling back to wp-login.php.
+	 */
+	public function login_url(): string {
+		if ( class_exists( 'MeprOptions' ) ) {
+			try {
+				$options = MeprOptions::fetch();
+				if ( ! empty( $options->login_page_id ) ) {
+					$permalink = get_permalink( (int) $options->login_page_id );
+					if ( $permalink ) {
+						return (string) $permalink;
+					}
+				}
+			} catch ( Throwable $e ) {
+				$this->log( 'Login page lookup failed: ' . $e->getMessage() );
+			}
+		}
+
+		return wp_login_url();
 	}
 
 	public function get_transaction_row( int $transaction_id ): ?object {

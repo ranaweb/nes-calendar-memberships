@@ -3,7 +3,7 @@
  * Plugin Name: NES Calendar Memberships
  * Plugin URI: https://github.com/ranaweb/nes-calendar-memberships
  * Description: Calendar-year membership routing, checkout messaging, dashboard helpers, and admin safety tools for NES MemberPress memberships.
- * Version: 1.0.3
+ * Version: 1.0.4
  * Requires at least: 6.5
  * Tested up to: 7.0
  * Requires PHP: 8.1
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'NESCM_VERSION', '1.0.3' );
+define( 'NESCM_VERSION', '1.0.4' );
 define( 'NESCM_FILE', __FILE__ );
 define( 'NESCM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'NESCM_URL', plugin_dir_url( __FILE__ ) );
@@ -44,6 +44,8 @@ $nescm_files = array(
 	'includes/class-admin-manual-renewal.php',
 	'includes/class-year-generator.php',
 	'includes/class-validator.php',
+	'includes/class-member-access.php',
+	'includes/class-woo-integration.php',
 	'includes/class-plugin.php',
 );
 

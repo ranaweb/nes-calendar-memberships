@@ -4,7 +4,7 @@ Tags: memberpress, memberships, renewals
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,13 @@ This plugin does not replace MemberPress, process payments, store cards, or impl
 5. Configure settings, tag memberships, and run Checkup.
 
 == Changelog ==
+
+= 1.0.4 =
+* [nescm_membership_expiration] gains part="label|date" and fallback attributes for composing dashboard rows.
+* Auto-renew members see their subscription's next billing date; expired memberships read "Expired on <date>".
+* [nescm_renew_cta] gains an href attribute; new [nescm_auto_renew_url] shortcode; [nescm_renewal_url] resolves the current member's family automatically.
+* Members-only dashboard gate on the configured Dashboard Page, and smart post-login routing (members to the dashboard, others to the shop account).
+* WooCommerce: members-only "Member Dashboard" account menu item, and member/billing address sync (toggleable).
 
 = 1.0.3 =
 * Dashboard now shows "Renews <date>" for recurring memberships and "Expires <date>" for yearly ones.

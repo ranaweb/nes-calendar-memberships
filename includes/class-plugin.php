@@ -25,6 +25,8 @@ final class NESCM_Plugin {
 	public NESCM_Admin_Manual_Renewal $manual_renewal;
 	public NESCM_Year_Generator $year_generator;
 	public NESCM_Validator $validator;
+	public NESCM_Member_Access $member_access;
+	public NESCM_Woo_Integration $woo_integration;
 
 	public static function instance(): NESCM_Plugin {
 		if ( null === self::$instance ) {
@@ -63,6 +65,8 @@ final class NESCM_Plugin {
 		$this->manual_renewal       = new NESCM_Admin_Manual_Renewal( $this->adapter, $this->settings, $this->calculator );
 		$this->year_generator       = new NESCM_Year_Generator( $this->adapter, $this->settings, $this->calculator );
 		$this->validator            = new NESCM_Validator( $this->adapter, $this->settings, $this->calculator );
+		$this->member_access        = new NESCM_Member_Access( $this->adapter, $this->settings );
+		$this->woo_integration      = new NESCM_Woo_Integration( $this->adapter, $this->settings, $this->member_access );
 
 		$this->settings->register_tab( 'settings', __( 'Settings', 'nes-calendar-memberships' ), array( $this->settings, 'render_settings_tab' ) );
 		$this->settings->register_tab( 'membership-types', __( 'Membership Types', 'nes-calendar-memberships' ), array( $this->membership_types, 'render_tab' ) );
@@ -84,6 +88,8 @@ final class NESCM_Plugin {
 		$this->dashboard_shortcodes->hooks();
 		$this->manual_renewal->hooks();
 		$this->year_generator->hooks();
+		$this->member_access->hooks();
+		$this->woo_integration->hooks();
 	}
 
 	public function memberpress_missing_notice(): void {

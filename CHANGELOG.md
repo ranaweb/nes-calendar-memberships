@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.4 - 2026-06-27
+
+- `[nescm_membership_expiration]` gains `part="label"` (outputs `Renews` / `Expires` / `Expired on`), `part="date"` (date only), and a `fallback` attribute — so Elementor dashboards can compose fully dynamic label/value rows with no static text.
+- Auto-renew members now see the subscription's **next billing date** (resolved from the active MemberPress subscription, falling back to the transaction expiration). Expired memberships now read "Expired on <date>".
+- `[nescm_renew_cta]` gains an `href` attribute so the renewal button can point at a renewal chooser page instead of deep-linking to checkout.
+- New `[nescm_auto_renew_url]` shortcode: the checkout URL of the recurring (auto-renew) membership for the current member's family (or an explicit `family` attribute). `[nescm_renewal_url]` with no attribute now resolves the current member's family too — one generic renewal chooser page works for every member.
+- New members-only **dashboard gate**: the Dashboard Page ID setting now protects the member dashboard. Members — including expired members — may view it; other logged-in users are redirected to the WooCommerce account page; logged-out visitors are sent to the login page and returned after logging in.
+- New **smart login routing**: after login, members land on the dashboard and everyone else on the shop account page. Staff keep the WordPress default. An explicit `redirect_to` always wins; disable entirely with the `nescm_login_routing_enabled` filter.
+- New **WooCommerce integration** (active only when WooCommerce is installed): a members-only "Member Dashboard" item in the account navigation, and **address sync** — the MemberPress member address and the WooCommerce billing address stay in step whichever one is updated (Settings → Address Sync to disable).
+
 ## 1.0.3 - 2026-06-26
 
 - Dashboard wording now distinguishes the two membership types: recurring memberships show "Renews <date>" and yearly (one-time) memberships show "Expires <date>".

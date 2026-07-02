@@ -53,6 +53,8 @@ const requiredFiles = [
   'includes/class-admin-manual-renewal.php',
   'includes/class-year-generator.php',
   'includes/class-validator.php',
+  'includes/class-member-access.php',
+  'includes/class-woo-integration.php',
   'templates/admin-howto.php',
   'templates/admin-membership-types.php',
   'README.md',

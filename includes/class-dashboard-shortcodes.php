@@ -38,8 +38,38 @@ final class NESCM_Dashboard_Shortcodes {
 		return esc_html( $this->summary()['status_label'] );
 	}
 
-	public function membership_expiration(): string {
-		return esc_html( $this->summary()['expiration_label'] );
+	/**
+	 * Renewal/expiration output.
+	 *
+	 * [nescm_membership_expiration]                      → full sentence ("Renews June 25, 2027")
+	 * [nescm_membership_expiration part="label"]         → just "Renews" / "Expires" / "Expired on"
+	 * [nescm_membership_expiration part="date" fallback="—"] → just the date, with an empty-state fallback
+	 *
+	 * @param array|string $atts Shortcode attributes.
+	 */
+	public function membership_expiration( $atts = array() ): string {
+		$atts = shortcode_atts(
+			array(
+				'part'     => '',
+				'fallback' => '',
+			),
+			is_array( $atts ) ? $atts : array(),
+			'nescm_membership_expiration'
+		);
+
+		$part     = sanitize_key( (string) $atts['part'] );
+		$fallback = sanitize_text_field( (string) $atts['fallback'] );
+		$summary  = $this->summary();
+
+		if ( 'label' === $part ) {
+			return esc_html( $summary['renewal_label'] ? $summary['renewal_label'] : $fallback );
+		}
+
+		if ( 'date' === $part ) {
+			return esc_html( $summary['renewal_date'] ? $summary['renewal_date'] : $fallback );
+		}
+
+		return esc_html( $summary['expiration_label'] ? $summary['expiration_label'] : $fallback );
 	}
 
 	public function renewal_method(): string {
@@ -88,8 +118,18 @@ final class NESCM_Dashboard_Shortcodes {
 	 * or the current membership has expired, this shows a "Renew now for <year>" button
 	 * that routes the member to the correct year's checkout. Recurring members renew
 	 * automatically, so they never see this.
+	 *
+	 * @param array|string $atts Shortcode attributes (`href` overrides the destination).
 	 */
-	public function renew_cta(): string {
+	public function renew_cta( $atts = array() ): string {
+		$atts = shortcode_atts(
+			array(
+				'href' => '',
+			),
+			is_array( $atts ) ? $atts : array(),
+			'nescm_renew_cta'
+		);
+
 		$summary = $this->summary();
 
 		if ( 'auto_renew' === $summary['renewal_method'] || 'pending' === $summary['status'] || '' === $summary['family_key'] ) {
@@ -113,7 +153,8 @@ final class NESCM_Dashboard_Shortcodes {
 			return '';
 		}
 
-		$url           = add_query_arg( 'family', rawurlencode( $summary['family_key'] ), home_url( '/membership-renew/' ) );
+		// A custom href (e.g. the renewal chooser page) wins over the direct year checkout route.
+		$url           = $atts['href'] ? esc_url_raw( (string) $atts['href'] ) : add_query_arg( 'family', rawurlencode( $summary['family_key'] ), home_url( '/membership-renew/' ) );
 		$valid_through = wp_date( 'F j, Y', strtotime( $target_year . '-12-31' ), wp_timezone() );
 
 		/* translators: %d: the membership year now available to renew into. */
@@ -141,6 +182,8 @@ final class NESCM_Dashboard_Shortcodes {
 			'status'               => 'none',
 			'status_label'         => __( 'No current membership on file', 'nes-calendar-memberships' ),
 			'expiration_label'     => '',
+			'renewal_label'        => '',
+			'renewal_date'         => '',
 			'renewal_method'       => 'manual',
 			'renewal_method_label' => '',
 			'family_key'           => '',
@@ -190,16 +233,36 @@ final class NESCM_Dashboard_Shortcodes {
 		);
 
 		$expiration_label = '';
+		$renewal_label    = '';
+		$renewal_date     = '';
+
 		if ( 'pending' === $status ) {
 			$expiration_label = __( 'Your membership renewal will be confirmed once NES receives and records your check or Zelle payment.', 'nes-calendar-memberships' );
 		} elseif ( $expires_at && '0000-00-00 00:00:00' !== $expires_at ) {
-			$date = wp_date( 'F j, Y', strtotime( $expires_at ), wp_timezone() );
-			if ( 'auto_renew' === $method ) {
+			// For auto-renew members the meaningful date is the subscription's next
+			// billing boundary; for yearly members it is the fixed expiration.
+			$boundary = $expires_at;
+			if ( 'auto_renew' === $method && 'expired' !== $status ) {
+				$next_billing = $this->recurring_next_billing( $txn );
+				if ( $next_billing ) {
+					$boundary = $next_billing;
+				}
+			}
+
+			$renewal_date = (string) wp_date( 'F j, Y', strtotime( $boundary ), wp_timezone() );
+
+			if ( 'expired' === $status ) {
+				$renewal_label = __( 'Expired on', 'nes-calendar-memberships' );
+				/* translators: %s: formatted date the membership expired. */
+				$expiration_label = sprintf( __( 'Expired on %s', 'nes-calendar-memberships' ), $renewal_date );
+			} elseif ( 'auto_renew' === $method ) {
+				$renewal_label = __( 'Renews', 'nes-calendar-memberships' );
 				/* translators: %s: formatted date the membership renews. */
-				$expiration_label = sprintf( __( 'Renews %s', 'nes-calendar-memberships' ), $date );
+				$expiration_label = sprintf( __( 'Renews %s', 'nes-calendar-memberships' ), $renewal_date );
 			} else {
+				$renewal_label = __( 'Expires', 'nes-calendar-memberships' );
 				/* translators: %s: formatted date the membership expires. */
-				$expiration_label = sprintf( __( 'Expires %s', 'nes-calendar-memberships' ), $date );
+				$expiration_label = sprintf( __( 'Expires %s', 'nes-calendar-memberships' ), $renewal_date );
 			}
 		}
 
@@ -208,11 +271,41 @@ final class NESCM_Dashboard_Shortcodes {
 			'status'               => $status,
 			'status_label'         => $status_labels[ $status ],
 			'expiration_label'     => $expiration_label,
+			'renewal_label'        => $renewal_label,
+			'renewal_date'         => $renewal_date,
 			'renewal_method'       => $method,
 			'renewal_method_label' => $method_labels[ $method ] ?? $method_labels['manual'],
 			'family_key'           => $family,
 			'year'                 => $year,
 		);
+	}
+
+	/**
+	 * The next billing boundary for an active recurring membership, as a MySQL
+	 * datetime string. Falls back to '' (caller then uses the txn expires_at).
+	 *
+	 * @param object $txn Latest NES transaction row for the user.
+	 * @return string
+	 */
+	private function recurring_next_billing( object $txn ): string {
+		if ( empty( $txn->subscription_id ) || ! class_exists( 'MeprSubscription' ) ) {
+			return '';
+		}
+
+		try {
+			$sub = new MeprSubscription( (int) $txn->subscription_id );
+
+			if ( isset( $sub->status ) && in_array( (string) $sub->status, array( 'active', 'enabled' ), true ) && method_exists( $sub, 'latest_txn' ) ) {
+				$latest = $sub->latest_txn();
+				if ( $latest && ! empty( $latest->expires_at ) && '0000-00-00 00:00:00' !== (string) $latest->expires_at ) {
+					return (string) $latest->expires_at;
+				}
+			}
+		} catch ( Throwable $e ) {
+			$this->adapter->log( 'Next billing lookup failed: ' . $e->getMessage() );
+		}
+
+		return '';
 	}
 
 	private function is_active_recurring_transaction( object $txn ): bool {

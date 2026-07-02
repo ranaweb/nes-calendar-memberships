@@ -28,6 +28,7 @@ final class NESCM_Settings {
 			'enable_auto_renew_cta'      => 'no',
 			'auto_renew_cta_url'         => '',
 			'default_dashboard_page_id'  => 0,
+			'sync_billing_address'       => 'yes',
 			'debug_logging'              => 'no',
 		);
 	}
@@ -113,6 +114,7 @@ final class NESCM_Settings {
 		$output['enable_auto_renew_cta']     = isset( $input['enable_auto_renew_cta'] ) && 'yes' === $input['enable_auto_renew_cta'] ? 'yes' : 'no';
 		$output['auto_renew_cta_url']        = isset( $input['auto_renew_cta_url'] ) ? esc_url_raw( (string) $input['auto_renew_cta_url'] ) : '';
 		$output['default_dashboard_page_id'] = absint( $input['default_dashboard_page_id'] ?? 0 );
+		$output['sync_billing_address']      = isset( $input['sync_billing_address'] ) && 'yes' === $input['sync_billing_address'] ? 'yes' : 'no';
 		$output['debug_logging']             = isset( $input['debug_logging'] ) && 'yes' === $input['debug_logging'] ? 'yes' : 'no';
 
 		return $output;
@@ -291,7 +293,17 @@ final class NESCM_Settings {
 				</tr>
 				<tr>
 					<th scope="row"><label for="nescm_dashboard_page"><?php esc_html_e( 'Dashboard Page ID', 'nes-calendar-memberships' ); ?></label></th>
-					<td><input id="nescm_dashboard_page" class="small-text" type="number" min="0" name="nescm_settings[default_dashboard_page_id]" value="<?php echo esc_attr( (string) $settings['default_dashboard_page_id'] ); ?>" /></td>
+					<td>
+						<input id="nescm_dashboard_page" class="small-text" type="number" min="0" name="nescm_settings[default_dashboard_page_id]" value="<?php echo esc_attr( (string) $settings['default_dashboard_page_id'] ); ?>" />
+						<p class="description"><?php esc_html_e( 'The member dashboard page. Members (including expired members) can view it; other logged-in users are sent to the shop account page, and logged-out visitors to the login page. Members are also sent here after logging in. Set to 0 to disable.', 'nes-calendar-memberships' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Address Sync', 'nes-calendar-memberships' ); ?></th>
+					<td>
+						<label><input type="checkbox" name="nescm_settings[sync_billing_address]" value="yes" <?php checked( $settings['sync_billing_address'], 'yes' ); ?> /> <?php esc_html_e( 'Keep the member address and the WooCommerce billing address in step', 'nes-calendar-memberships' ); ?></label>
+						<p class="description"><?php esc_html_e( 'When a member updates their address in either place, the other is updated to match. Requires WooCommerce.', 'nes-calendar-memberships' ); ?></p>
+					</td>
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Debug Logging', 'nes-calendar-memberships' ); ?></th>
