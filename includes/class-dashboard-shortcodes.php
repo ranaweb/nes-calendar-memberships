@@ -132,7 +132,13 @@ final class NESCM_Dashboard_Shortcodes {
 
 		$summary = $this->summary();
 
-		if ( 'auto_renew' === $summary['renewal_method'] || 'pending' === $summary['status'] || '' === $summary['family_key'] ) {
+		if ( 'pending' === $summary['status'] || '' === $summary['family_key'] ) {
+			return '';
+		}
+
+		// Auto-renew members renew automatically and never see this while active —
+		// but once their membership has lapsed they need the renewal path too.
+		if ( 'auto_renew' === $summary['renewal_method'] && 'expired' !== $summary['status'] ) {
 			return '';
 		}
 

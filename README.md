@@ -123,9 +123,10 @@ recurring wording when it can detect an active MemberPress subscription.
 in Elementor.
 
 `[nescm_renew_cta]` shows a "Renew now for <year>" button to a yearly member once the next membership year
-is available to purchase (after the annual cutoff) or once their membership has expired. Recurring members
-never see it, since they renew automatically. Add `href="/renew/"` to send members to a renewal chooser
-page instead of directly to checkout.
+is available to purchase (after the annual cutoff) or once their membership has expired. Active recurring
+members never see it, since they renew automatically — but expired recurring members do, so lapsed members
+always have a renewal path. Add `href="/renew/"` to send members to a renewal chooser page instead of
+directly to checkout.
 
 `[nescm_renewal_url]` (yearly) and `[nescm_auto_renew_url]` (recurring) output checkout URLs. With no
 `family` attribute they resolve the current member's family — so one renewal chooser page serves every

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.6 - 2026-07-02
+
+- Fixed: `[nescm_renew_cta]` now renders for **expired** members whose product is the recurring (auto-renew) type — a lapsed auto-renew member needs the renewal path like anyone else. The button remains hidden for auto-renew members while their membership is active, per the dashboard state model.
+
 ## 1.0.5 - 2026-06-28
 
 - Fixed: smart login routing now applies when logging in through the MemberPress login form — the form's hidden `redirect_to` field was being treated as an explicit destination and disabled routing. Only a `redirect_to` in the URL (a genuinely requested destination) now bypasses routing; the core wp-login form's default admin redirect is also ignored.

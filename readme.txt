@@ -4,7 +4,7 @@ Tags: memberpress, memberships, renewals
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,9 @@ This plugin does not replace MemberPress, process payments, store cards, or impl
 5. Configure settings, tag memberships, and run Checkup.
 
 == Changelog ==
+
+= 1.0.6 =
+* Fixed: the renew button now appears for expired auto-renew members. It stays hidden for active auto-renew members.
 
 = 1.0.5 =
 * Fixed: smart login routing now works from the MemberPress login form (its hidden redirect field no longer disables routing).
