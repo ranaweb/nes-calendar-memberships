@@ -34,8 +34,35 @@ final class NESCM_Dashboard_Shortcodes {
 		return esc_html( $this->summary()['label'] );
 	}
 
-	public function membership_status(): string {
-		return esc_html( $this->summary()['status_label'] );
+	/**
+	 * Membership status output.
+	 *
+	 * [nescm_membership_status]             → plain text ("Active" / "Renewal Pending" / "Expired")
+	 * [nescm_membership_status badge="yes"] → a colored pill carrying a state class
+	 *                                         (nescm-status-active | -pending | -expired | -none)
+	 *
+	 * @param array|string $atts Shortcode attributes.
+	 */
+	public function membership_status( $atts = array() ): string {
+		$atts = shortcode_atts(
+			array(
+				'badge' => '',
+			),
+			is_array( $atts ) ? $atts : array(),
+			'nescm_membership_status'
+		);
+
+		$summary = $this->summary();
+
+		if ( 'yes' !== $atts['badge'] ) {
+			return esc_html( $summary['status_label'] );
+		}
+
+		return sprintf(
+			'<span class="nescm-status nescm-status-%1$s">%2$s</span>',
+			esc_attr( $summary['status'] ),
+			esc_html( $summary['status_label'] )
+		);
 	}
 
 	/**

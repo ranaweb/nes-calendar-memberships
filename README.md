@@ -122,6 +122,9 @@ recurring wording when it can detect an active MemberPress subscription.
 `part="date"` (just the date), and `fallback="—"` for empty states — use these to compose label/value rows
 in Elementor.
 
+`[nescm_membership_status badge="yes"]` renders the status as a state-colored pill — green (active),
+amber (pending/none), red (expired) — instead of plain text.
+
 `[nescm_renew_cta]` shows a "Renew now for <year>" button to a yearly member once the next membership year
 is available to purchase (after the annual cutoff) or once their membership has expired. Active recurring
 members never see it, since they renew automatically — but expired recurring members do, so lapsed members

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.7 - 2026-07-02
+
+- `[nescm_membership_status]` gains `badge="yes"`: outputs a state-colored pill (`nescm-status-active|pending|expired|none`) — green for active, amber for pending/none, red for expired — with accessible colors shipped in the plugin stylesheet. Plain-text output (no attribute) is unchanged. Wrappers with the `nes-membership-status` class are recolored to match the state via `:has()`.
+
 ## 1.0.6 - 2026-07-02
 
 - Fixed: `[nescm_renew_cta]` now renders for **expired** members whose product is the recurring (auto-renew) type — a lapsed auto-renew member needs the renewal path like anyone else. The button remains hidden for auto-renew members while their membership is active, per the dashboard state model.
