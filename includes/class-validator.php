@@ -79,7 +79,9 @@ final class NESCM_Validator {
 				$items[] = $this->item( 'error', $title, __( 'Manual membership is missing a four-digit membership year.', 'nes-calendar-memberships' ), __( 'Set the membership year in the NES metabox.', 'nes-calendar-memberships' ) );
 			}
 
-			if ( ! $through || ! nescm_parse_date( $through ) ) {
+			// Only yearly (manual) memberships carry a valid-through date; recurring
+			// memberships are perpetual and correctly have none.
+			if ( 'manual' === $method && ( ! $through || ! nescm_parse_date( $through ) ) ) {
 				$items[] = $this->item( 'error', $title, __( 'Missing or invalid valid-through date.', 'nes-calendar-memberships' ), __( 'Set valid through to December 31 of the membership year.', 'nes-calendar-memberships' ) );
 			}
 

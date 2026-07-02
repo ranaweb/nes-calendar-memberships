@@ -9,6 +9,7 @@
 - New members-only **dashboard gate**: the Dashboard Page ID setting now protects the member dashboard. Members — including expired members — may view it; other logged-in users are redirected to the WooCommerce account page; logged-out visitors are sent to the login page and returned after logging in.
 - New **smart login routing**: after login, members land on the dashboard and everyone else on the shop account page. Staff keep the WordPress default. An explicit `redirect_to` always wins; disable entirely with the `nescm_login_routing_enabled` filter.
 - New **WooCommerce integration** (active only when WooCommerce is installed): a members-only "Member Dashboard" item in the account navigation, and **address sync** — the MemberPress member address and the WooCommerce billing address stay in step whichever one is updated (Settings → Address Sync to disable).
+- Fixed: Checkup no longer flags recurring (auto-renew) memberships for having no valid-through date — recurring memberships are perpetual; the check now applies to yearly (manual) memberships only.
 
 ## 1.0.3 - 2026-06-26
 
