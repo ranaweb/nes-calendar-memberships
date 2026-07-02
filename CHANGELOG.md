@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.5 - 2026-06-28
+
+- Fixed: smart login routing now applies when logging in through the MemberPress login form — the form's hidden `redirect_to` field was being treated as an explicit destination and disabled routing. Only a `redirect_to` in the URL (a genuinely requested destination) now bypasses routing; the core wp-login form's default admin redirect is also ignored.
+- Cross-links between the two account areas, shown only when relevant: members get a **"Membership Profile"** item (→ the MemberPress account page, resolved by ID) in the WooCommerce account navigation, and users with WooCommerce order history get a **"My Orders"** item (→ the Woo orders endpoint) in the MemberPress account navigation.
+
 ## 1.0.4 - 2026-06-27
 
 - `[nescm_membership_expiration]` gains `part="label"` (outputs `Renews` / `Expires` / `Expired on`), `part="date"` (date only), and a `fallback` attribute — so Elementor dashboards can compose fully dynamic label/value rows with no static text.

@@ -372,6 +372,27 @@ final class NESCM_MemberPress_Adapter {
 	}
 
 	/**
+	 * URL of the MemberPress account page ('' when unavailable).
+	 */
+	public function account_url(): string {
+		if ( class_exists( 'MeprOptions' ) ) {
+			try {
+				$options = MeprOptions::fetch();
+				if ( ! empty( $options->account_page_id ) ) {
+					$permalink = get_permalink( (int) $options->account_page_id );
+					if ( $permalink ) {
+						return (string) $permalink;
+					}
+				}
+			} catch ( Throwable $e ) {
+				$this->log( 'Account page lookup failed: ' . $e->getMessage() );
+			}
+		}
+
+		return '';
+	}
+
+	/**
 	 * URL of the MemberPress login page, falling back to wp-login.php.
 	 */
 	public function login_url(): string {

@@ -94,8 +94,9 @@ final class NESCM_Member_Access {
 			return $redirect_to;
 		}
 
-		// An explicitly requested destination always wins.
-		if ( is_string( $requested_redirect_to ) && '' !== $requested_redirect_to ) {
+		// An explicitly requested destination wins — but the login form's default
+		// hidden redirect (admin_url) is not an explicit request.
+		if ( is_string( $requested_redirect_to ) && '' !== $requested_redirect_to && admin_url() !== $requested_redirect_to ) {
 			return $redirect_to;
 		}
 
@@ -114,8 +115,10 @@ final class NESCM_Member_Access {
 			return $url;
 		}
 
+		// Only a redirect requested in the URL is explicit — the MemberPress login
+		// form always POSTs a hidden redirect_to field, which must not disable routing.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing hint; no state change.
-		if ( ! empty( $_REQUEST['redirect_to'] ) ) {
+		if ( ! empty( $_GET['redirect_to'] ) ) {
 			return $url;
 		}
 

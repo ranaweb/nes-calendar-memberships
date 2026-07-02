@@ -46,9 +46,53 @@ final class NESCM_Woo_Integration {
 
 		add_filter( 'woocommerce_account_menu_items', array( $this, 'account_menu_items' ) );
 		add_filter( 'woocommerce_get_endpoint_url', array( $this, 'endpoint_url' ), 10, 2 );
+		add_action( 'mepr_account_nav', array( $this, 'memberpress_nav_orders' ) );
 
 		add_action( 'updated_user_meta', array( $this, 'sync_address_meta' ), 10, 4 );
 		add_action( 'added_user_meta', array( $this, 'sync_address_meta' ), 10, 4 );
+	}
+
+	/**
+	 * Whether the user has any WooCommerce order history.
+	 *
+	 * @param int $user_id WordPress user ID.
+	 * @return bool
+	 */
+	private function user_is_customer( int $user_id ): bool {
+		if ( $user_id <= 0 || ! function_exists( 'wc_get_orders' ) ) {
+			return false;
+		}
+
+		$orders = wc_get_orders(
+			array(
+				'customer_id' => $user_id,
+				'limit'       => 1,
+				'return'      => 'ids',
+			)
+		);
+
+		return ! empty( $orders );
+	}
+
+	/**
+	 * Adds an "My Orders" item to the MemberPress account navigation for users
+	 * with WooCommerce order history.
+	 */
+	public function memberpress_nav_orders(): void {
+		if ( ! is_user_logged_in() || ! $this->user_is_customer( get_current_user_id() ) ) {
+			return;
+		}
+
+		$url = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'orders' ) : '';
+		if ( ! $url ) {
+			return;
+		}
+
+		printf(
+			'<li class="mepr-nav-item nes-orders-nav-item"><a id="nes-account-orders" href="%1$s">%2$s</a></li>',
+			esc_url( $url ),
+			esc_html__( 'My Orders', 'nes-calendar-memberships' )
+		);
 	}
 
 	/**
@@ -58,11 +102,21 @@ final class NESCM_Woo_Integration {
 	 * @return array
 	 */
 	public function account_menu_items( array $items ): array {
-		if ( ! is_user_logged_in() || ! $this->access->dashboard_url() || ! $this->access->is_member( get_current_user_id() ) ) {
+		if ( ! is_user_logged_in() || ! $this->access->is_member( get_current_user_id() ) ) {
 			return $items;
 		}
 
-		return array( 'nes-member-dashboard' => __( 'Member Dashboard', 'nes-calendar-memberships' ) ) + $items;
+		$member_items = array();
+
+		if ( $this->access->dashboard_url() ) {
+			$member_items['nes-member-dashboard'] = __( 'Member Dashboard', 'nes-calendar-memberships' );
+		}
+
+		if ( $this->adapter->account_url() ) {
+			$member_items['nes-member-profile'] = __( 'Membership Profile', 'nes-calendar-memberships' );
+		}
+
+		return $member_items + $items;
 	}
 
 	/**
@@ -77,6 +131,13 @@ final class NESCM_Woo_Integration {
 			$dashboard = $this->access->dashboard_url();
 			if ( $dashboard ) {
 				return $dashboard;
+			}
+		}
+
+		if ( 'nes-member-profile' === $endpoint ) {
+			$account = $this->adapter->account_url();
+			if ( $account ) {
+				return $account;
 			}
 		}
 
