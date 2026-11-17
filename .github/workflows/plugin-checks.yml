@@ -13,3 +13,6 @@ jobs:
         with:
           node-version: 24
       - run: npm run check
+      - run: node --check calendar/assets/recurrence.js && node --check calendar/assets/series.js
+      - run: git ls-files -z '*.php' | xargs -0 -n1 php -l
+      - run: php qa/test-recurrence.php

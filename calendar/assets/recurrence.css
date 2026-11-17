@@ -1,0 +1,17 @@
+.nescal-recurrence [hidden], #nescal-new-group[hidden] { display: none !important; }
+.nescal-recurrence { max-width: 54rem; }
+.nescal-current { font-weight: 600; margin: .5rem 0; }
+.nescal-panel { margin-top: .7rem; }
+.nescal-rule { border-left: 3px solid #c3c4c7; background: #f6f7f7; padding: .65rem 1rem; margin-bottom: .8rem; }
+.nescal-row, .nescal-actions { display: flex; flex-wrap: wrap; align-items: end; gap: .55rem 1rem; margin: .4rem 0; }
+.nescal-field { display: inline-flex; align-items: center; flex-wrap: wrap; gap: .35rem; }
+.nescal-field input[type=number] { width: 5rem; }
+.nescal-checks { margin: .55rem 0; padding: 0; border: 0; }
+.nescal-checks legend { padding: 0; margin-bottom: .25rem; }
+.nescal-checks label { display: inline-block; white-space: nowrap; margin: .2rem .8rem .2rem 0; }
+.nescal-recurrence details { margin: .75rem 0; }
+.nescal-recurrence summary { cursor: pointer; color: #135e96; }
+.nescal-actions { align-items: center; margin-top: .75rem; }
+.nescal-preview { margin-top: .75rem; }
+.nescal-preview ol { margin: .4rem 0 .4rem 1.5rem; }
+#nescal-members .nescal-search-results { margin: .7rem 0; }

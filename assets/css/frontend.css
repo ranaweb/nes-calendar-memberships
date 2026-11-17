@@ -42,3 +42,60 @@
 	background: #1f6f8b;
 	color: #fff;
 }
+
+/*
+ * Membership status badge — [nescm_membership_status badge="yes"].
+ * State colors: active = green, pending/none = amber, expired = red.
+ */
+.nescm-status {
+	display: inline-flex;
+	align-items: center;
+	padding: 4px 12px;
+	border: 1px solid currentColor;
+	border-radius: 2px;
+	font-size: 0.8em;
+	font-weight: 700;
+	line-height: 1.3;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.nescm-status-active {
+	color: #1e7d3c;
+	border-color: #a5d5b2;
+	background: #eef7f0;
+}
+
+.nescm-status-pending,
+.nescm-status-none {
+	color: #9a6200;
+	border-color: #e8ca8c;
+	background: #fdf4e0;
+}
+
+.nescm-status-expired {
+	color: #9a3b3b;
+	border-color: #e3b7b7;
+	background: #fff3f3;
+}
+
+/*
+ * If the badge sits inside a wrapper that draws its own border (e.g. an
+ * Elementor widget with a custom class), recolor that wrapper to match
+ * the state so text and border always agree.
+ */
+.nes-membership-status:has(.nescm-status-active) {
+	color: #1e7d3c;
+	border-color: #a5d5b2;
+}
+
+.nes-membership-status:has(.nescm-status-pending),
+.nes-membership-status:has(.nescm-status-none) {
+	color: #9a6200;
+	border-color: #e8ca8c;
+}
+
+.nes-membership-status:has(.nescm-status-expired) {
+	color: #9a3b3b;
+	border-color: #e3b7b7;
+}

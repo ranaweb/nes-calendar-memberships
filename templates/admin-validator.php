@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <p>
 	<?php
 	printf(
+		/* translators: 1: MemberPress edition, 2: MemberPress version. */
 		esc_html__( 'MemberPress detected: %1$s %2$s', 'nes-calendar-memberships' ),
 		esc_html( $edition ?: __( 'unknown edition', 'nes-calendar-memberships' ) ),
 		esc_html( $version ?: __( 'unknown version', 'nes-calendar-memberships' ) )
