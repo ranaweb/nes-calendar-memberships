@@ -18,15 +18,16 @@ function read(file) {
 const main = read(mainPath);
 const readme = read(readmePath);
 const pkg = JSON.parse(read(packagePath));
+const header = (name) => main.match(new RegExp('^\\s*\\* ' + name + ':\\s*(.+)$', 'm'))?.[1].trim();
 
 const checks = [
-  ['main version', /Version:\s*1\.0\.1/.test(main)],
-  ['readme stable tag', /Stable tag:\s*1\.0\.1/.test(readme)],
-  ['package version', pkg.version === '1.0.1'],
-  ['author', /Author:\s*Cider House/.test(main)],
+  ['main version', header('Version') === pkg.version && main.includes("define( 'NESCM_VERSION', '" + pkg.version + "' );")],
+  ['readme stable tag', readme.includes('Stable tag: ' + pkg.version)],
+  ['plugin site', header('Plugin URI') === 'https://github.com/ranaweb/nes-calendar-memberships'],
+  ['author', header('Author') === 'Rana Mustafiz and Cider House'],
   ['requires php', /Requires PHP:\s*8\.1/.test(main) && /Requires PHP:\s*8\.1/.test(readme)],
   ['tested up to', /Tested up to:\s*7\.0/.test(main) && /Tested up to:\s*7\.0/.test(readme)],
-  ['plugin name', /Plugin Name:\s*NES Calendar Memberships/.test(main)],
+  ['plugin name', header('Plugin Name') === 'NES Calendar & Memberships'],
 ];
 
 for (const [name, ok] of checks) {
@@ -47,11 +48,19 @@ const requiredFiles = [
   'includes/class-admin-manual-renewal.php',
   'includes/class-year-generator.php',
   'includes/class-validator.php',
+  'calendar/calendar.php',
+  'calendar/includes/class-series.php',
+  'calendar/includes/class-service.php',
+  'calendar/includes/class-engine.php',
+  'calendar/assets/series.js',
+  'calendar/assets/recurrence.js',
   'README.md',
   'readme.txt',
   'LICENSE',
   'uninstall.php',
 ];
+
+if (/Plugin Name:/i.test(read(path.join(root, 'calendar/calendar.php')))) fail('The package must have one plugin entry point.');
 
 for (const rel of requiredFiles) {
   if (!fs.existsSync(path.join(root, rel))) {

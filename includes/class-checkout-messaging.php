@@ -65,7 +65,8 @@ final class NESCM_Checkout_Messaging {
 		}
 
 		$today_year = $this->calculator->get_membership_year_for_date( $this->calculator->today() );
-		$immediate  = $year > (int) $this->calculator->today()->format( 'Y' ) || $year === $today_year && $this->calculator->is_after_cutoff( $this->calculator->today() );
+		$immediate  = ( $year > (int) $this->calculator->today()->format( 'Y' ) )
+			|| ( $year === $today_year && $this->calculator->is_after_cutoff( $this->calculator->today() ) );
 
 		return nescm_render_template(
 			'checkout-notice.php',

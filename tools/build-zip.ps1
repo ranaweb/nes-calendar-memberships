@@ -1,33 +1,15 @@
 param(
-  [string]$Version = "1.0.1"
+  [string]$Version
 )
 
 $ErrorActionPreference = "Stop"
 
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+if (-not $Version) { $Version = (Get-Content -Raw -LiteralPath (Join-Path $Root "package.json") | ConvertFrom-Json).version }
 $PluginSlug = "nes-calendar-memberships"
 $Dist = Join-Path $Root "dist"
-$StageRoot = Join-Path $Dist "stage"
-$StagePlugin = Join-Path $StageRoot $PluginSlug
 
-if (Test-Path $Dist) {
-  Remove-Item -LiteralPath $Dist -Recurse -Force
-}
-
-New-Item -ItemType Directory -Force -Path $StagePlugin | Out-Null
-
-$ExcludeTop = @(".git", ".github", "dist", "node_modules", "qa", "tools")
-$ExcludeNames = @(".DS_Store", "Thumbs.db", ".gitignore", ".gitattributes", "package.json")
-
-Get-ChildItem -LiteralPath $Root -Force | ForEach-Object {
-  if ($ExcludeTop -contains $_.Name) {
-    return
-  }
-  if ($ExcludeNames -contains $_.Name) {
-    return
-  }
-  Copy-Item -LiteralPath $_.FullName -Destination $StagePlugin -Recurse -Force
-}
+New-Item -ItemType Directory -Force -Path $Dist | Out-Null
 
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -48,10 +30,14 @@ function New-ZipWithForwardSlashes {
   $Archive = [System.IO.Compression.ZipFile]::Open($DestinationZip, [System.IO.Compression.ZipArchiveMode]::Create)
   try {
     $Base = (Get-Item -LiteralPath $SourceDirectory).FullName.TrimEnd("\", "/")
-    Get-ChildItem -LiteralPath $SourceDirectory -Recurse -File | ForEach-Object {
+    $Files = foreach ($Top in @('nes-calendar-memberships.php','uninstall.php','readme.txt','README.md','CHANGELOG.md','LICENSE','assets','includes','templates','calendar')) {
+      $Item = Get-Item -LiteralPath (Join-Path $Base $Top)
+      if ($Item.PSIsContainer) { Get-ChildItem -LiteralPath $Item.FullName -File -Recurse } else { $Item }
+    }
+    $Files | Sort-Object FullName | ForEach-Object {
       $FullName = $_.FullName
       $Relative = $FullName.Substring($Base.Length + 1).Replace("\", "/")
-      [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($Archive, $FullName, $Relative) | Out-Null
+      [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($Archive, $FullName, "$PluginSlug/$Relative") | Out-Null
     }
   }
   finally {
@@ -59,7 +45,7 @@ function New-ZipWithForwardSlashes {
   }
 }
 
-New-ZipWithForwardSlashes -SourceDirectory $StageRoot -DestinationZip $PlainZip
+New-ZipWithForwardSlashes -SourceDirectory $Root -DestinationZip $PlainZip
 Copy-Item -LiteralPath $PlainZip -Destination $VersionZip -Force
 
 $Zip = [System.IO.Compression.ZipFile]::OpenRead($PlainZip)
@@ -76,8 +62,6 @@ $Zip.Dispose()
 if (-not $HasMain) {
   throw "ZIP verification failed. Missing $RequiredPath"
 }
-
-Remove-Item -LiteralPath $StageRoot -Recurse -Force
 
 Write-Host "Built $PlainZip"
 Write-Host "Built $VersionZip"

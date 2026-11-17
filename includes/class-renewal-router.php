@@ -26,6 +26,7 @@ final class NESCM_Renewal_Router {
 		add_action( 'template_redirect', array( $this, 'maybe_route' ) );
 		add_shortcode( 'nescm_renewal_router', array( $this, 'router_shortcode' ) );
 		add_shortcode( 'nescm_renewal_url', array( $this, 'url_shortcode' ) );
+		add_shortcode( 'nescm_auto_renew_url', array( $this, 'auto_renew_url_shortcode' ) );
 	}
 
 	public function rewrite_rules(): void {
@@ -101,9 +102,66 @@ final class NESCM_Renewal_Router {
 		return '<ul class="nescm-renewal-router">' . implode( '', $links ) . '</ul>';
 	}
 
-	public function url_shortcode( array $atts = array() ): string {
-		$atts = shortcode_atts( array( 'family' => '' ), $atts, 'nescm_renewal_url' );
-		return esc_url( $this->renewal_url( sanitize_key( (string) $atts['family'] ) ) );
+	/**
+	 * One-time (yearly) renewal URL. With no family attribute, resolves the
+	 * current member's family — so one generic renewal page works for everyone.
+	 *
+	 * @param array|string $atts Shortcode attributes (`family`).
+	 */
+	public function url_shortcode( $atts = array() ): string {
+		$atts   = shortcode_atts( array( 'family' => '' ), is_array( $atts ) ? $atts : array(), 'nescm_renewal_url' );
+		$family = sanitize_key( (string) $atts['family'] );
+
+		if ( '' === $family ) {
+			$family = $this->current_user_family();
+		}
+
+		return esc_url( $this->renewal_url( $family ) );
+	}
+
+	/**
+	 * Checkout URL of the recurring (auto-renew) membership for a family. With no
+	 * family attribute, resolves the current member's family. Empty when no
+	 * published recurring product exists.
+	 *
+	 * @param array|string $atts Shortcode attributes (`family`).
+	 */
+	public function auto_renew_url_shortcode( $atts = array() ): string {
+		$atts   = shortcode_atts( array( 'family' => '' ), is_array( $atts ) ? $atts : array(), 'nescm_auto_renew_url' );
+		$family = sanitize_key( (string) $atts['family'] );
+
+		if ( '' === $family ) {
+			$family = $this->current_user_family();
+		}
+
+		if ( ! nescm_is_valid_family_key( $family ) ) {
+			return '';
+		}
+
+		$membership_id = $this->adapter->find_recurring_membership( $family );
+
+		if ( ! $membership_id || ! $this->adapter->is_published_membership( $membership_id ) ) {
+			return '';
+		}
+
+		return esc_url( $this->adapter->checkout_url( $membership_id ) );
+	}
+
+	/**
+	 * The logged-in user's membership family, from their latest NES transaction.
+	 */
+	private function current_user_family(): string {
+		if ( ! is_user_logged_in() ) {
+			return '';
+		}
+
+		$txn = $this->adapter->get_latest_nes_transaction_for_user( get_current_user_id() );
+
+		if ( ! $txn || empty( $txn->product_id ) ) {
+			return '';
+		}
+
+		return (string) get_post_meta( (int) $txn->product_id, '_nescm_family_key', true );
 	}
 
 	private function friendly_error( string $message, string $admin_detail = '' ): void {

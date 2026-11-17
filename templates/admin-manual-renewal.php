@@ -15,7 +15,7 @@ $values = wp_parse_args(
 		'user'              => '',
 		'family'            => '',
 		'payment_date'      => wp_date( 'Y-m-d', null, wp_timezone() ),
-		'payment_method'    => 'cheque',
+		'payment_method'    => 'check',
 		'amount'            => '',
 		'reference'         => '',
 		'note'              => '',
@@ -33,7 +33,7 @@ $preview_config = array(
 );
 ?>
 <h2><?php esc_html_e( 'Pending Offline Payments', 'nes-calendar-memberships' ); ?></h2>
-<p><?php esc_html_e( 'Review pending cheque/Zelle/offline MemberPress transactions for NES memberships, then complete and activate them when payment has been received.', 'nes-calendar-memberships' ); ?></p>
+<p><?php esc_html_e( 'Review pending check/Zelle/offline MemberPress transactions for NES memberships, then complete and activate them when payment has been received.', 'nes-calendar-memberships' ); ?></p>
 
 <?php if ( ! empty( $review ) ) : ?>
 	<div class="nescm-review-panel">
@@ -58,12 +58,12 @@ $preview_config = array(
 			<div class="nescm-preview-panel">
 				<h4><?php esc_html_e( 'Calculation Preview', 'nes-calendar-memberships' ); ?></h4>
 				<ul>
-					<li><?php printf( esc_html__( 'Payment received: %s', 'nes-calendar-memberships' ), esc_html( $review['preview']['payment_date_display'] ) ); ?></li>
-					<li><?php printf( esc_html__( 'Cutoff: %s', 'nes-calendar-memberships' ), esc_html( $review['preview']['cutoff_date_display'] ) ); ?></li>
-					<li><?php printf( esc_html__( 'Result: %s', 'nes-calendar-memberships' ), esc_html( $review['preview']['result_label'] ) ); ?></li>
-					<li><?php printf( esc_html__( 'Membership year paid for: %s', 'nes-calendar-memberships' ), esc_html( (string) $review['preview']['year'] ) ); ?></li>
-					<li><?php printf( esc_html__( 'Valid through: %s', 'nes-calendar-memberships' ), esc_html( $review['preview']['valid_through_display'] ) ); ?></li>
-					<li><?php printf( esc_html__( 'Target MemberPress membership: %s', 'nes-calendar-memberships' ), esc_html( $review['preview']['target_title'] ) ); ?></li>
+					<li><?php /* translators: %s: payment received date. */ printf( esc_html__( 'Payment received: %s', 'nes-calendar-memberships' ), esc_html( $review['preview']['payment_date_display'] ) ); ?></li>
+					<li><?php /* translators: %s: annual cutoff date. */ printf( esc_html__( 'Cutoff: %s', 'nes-calendar-memberships' ), esc_html( $review['preview']['cutoff_date_display'] ) ); ?></li>
+					<li><?php /* translators: %s: cutoff result label. */ printf( esc_html__( 'Result: %s', 'nes-calendar-memberships' ), esc_html( $review['preview']['result_label'] ) ); ?></li>
+					<li><?php /* translators: %s: membership year. */ printf( esc_html__( 'Membership year paid for: %s', 'nes-calendar-memberships' ), esc_html( (string) $review['preview']['year'] ) ); ?></li>
+					<li><?php /* translators: %s: valid-through date. */ printf( esc_html__( 'Valid through: %s', 'nes-calendar-memberships' ), esc_html( $review['preview']['valid_through_display'] ) ); ?></li>
+					<li><?php /* translators: %s: target membership product title. */ printf( esc_html__( 'Target MemberPress membership: %s', 'nes-calendar-memberships' ), esc_html( $review['preview']['target_title'] ) ); ?></li>
 				</ul>
 			</div>
 		<?php endif; ?>
@@ -155,7 +155,7 @@ $preview_config = array(
 <hr />
 
 <h2><?php esc_html_e( 'Create Manual Renewal Manually', 'nes-calendar-memberships' ); ?></h2>
-<p><?php esc_html_e( 'Use this only if the member did not complete an online cheque/Zelle checkout and you need to record a payment received outside the website.', 'nes-calendar-memberships' ); ?></p>
+<p><?php esc_html_e( 'Use this only if the member did not complete an online check/Zelle checkout and you need to record a payment received outside the website.', 'nes-calendar-memberships' ); ?></p>
 
 <?php if ( ! empty( $pending['preview'] ) ) : ?>
 	<div class="notice notice-warning inline">
@@ -197,7 +197,7 @@ $preview_config = array(
 			<th scope="row"><?php esc_html_e( 'Payment Method', 'nes-calendar-memberships' ); ?></th>
 			<td>
 				<select name="nescm_manual[payment_method]">
-					<option value="cheque" <?php selected( $values['payment_method'], 'cheque' ); ?>><?php esc_html_e( 'Cheque', 'nes-calendar-memberships' ); ?></option>
+					<option value="check" <?php selected( $values['payment_method'], 'check' ); ?>><?php esc_html_e( 'Check', 'nes-calendar-memberships' ); ?></option>
 					<option value="zelle" <?php selected( $values['payment_method'], 'zelle' ); ?>><?php esc_html_e( 'Zelle', 'nes-calendar-memberships' ); ?></option>
 					<option value="other" <?php selected( $values['payment_method'], 'other' ); ?>><?php esc_html_e( 'Other offline', 'nes-calendar-memberships' ); ?></option>
 				</select>
@@ -253,6 +253,11 @@ window.NESCMManualRenewal = <?php echo wp_json_encode( $preview_config ); ?>;
 		}
 		return new Date(parts[0], parts[1] - 1, parts[2]);
 	}
+	function esc(value) {
+		return String(value).replace(/[&<>"']/g, function (c) {
+			return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+		});
+	}
 	function renderPreview() {
 		const date = parseDate(paymentDate.value);
 		const familyKey = family.value;
@@ -271,11 +276,11 @@ window.NESCMManualRenewal = <?php echo wp_json_encode( $preview_config ); ?>;
 			'<li><?php echo esc_js( __( 'Payment received:', 'nes-calendar-memberships' ) ); ?> ' + formatDate(date) + '</li>' +
 			'<li><?php echo esc_js( __( 'Cutoff:', 'nes-calendar-memberships' ) ); ?> ' + formatDate(cutoff) + '</li>' +
 			'<li><?php echo esc_js( __( 'Result:', 'nes-calendar-memberships' ) ); ?> ' + (afterCutoff ? '<?php echo esc_js( __( 'After cutoff', 'nes-calendar-memberships' ) ); ?>' : '<?php echo esc_js( __( 'On or before cutoff', 'nes-calendar-memberships' ) ); ?>') + '</li>' +
-			'<li><?php echo esc_js( __( 'Membership family:', 'nes-calendar-memberships' ) ); ?> ' + familyLabel + '</li>' +
+			'<li><?php echo esc_js( __( 'Membership family:', 'nes-calendar-memberships' ) ); ?> ' + esc(familyLabel) + '</li>' +
 			'<li><?php echo esc_js( __( 'Membership year paid for:', 'nes-calendar-memberships' ) ); ?> ' + year + '</li>' +
 			'<li><?php echo esc_js( __( 'Valid through:', 'nes-calendar-memberships' ) ); ?> ' + formatDate(validThrough) + '</li>' +
-			'<li><?php echo esc_js( __( 'Target membership product:', 'nes-calendar-memberships' ) ); ?> ' + (product ? product.title + ' (#' + product.id + ', ' + product.status + ')' : '<?php echo esc_js( __( 'Missing target membership', 'nes-calendar-memberships' ) ); ?>') + '</li>' +
-			'<li><?php echo esc_js( __( 'Status that will be created:', 'nes-calendar-memberships' ) ); ?> ' + status.options[status.selectedIndex].text + '</li>' +
+			'<li><?php echo esc_js( __( 'Target membership product:', 'nes-calendar-memberships' ) ); ?> ' + (product ? esc(product.title) + ' (#' + esc(product.id) + ', ' + esc(product.status) + ')' : '<?php echo esc_js( __( 'Missing target membership', 'nes-calendar-memberships' ) ); ?>') + '</li>' +
+			'<li><?php echo esc_js( __( 'Status that will be created:', 'nes-calendar-memberships' ) ); ?> ' + esc(status.options[status.selectedIndex].text) + '</li>' +
 			'</ul>';
 	}
 	family.addEventListener('change', renderPreview);

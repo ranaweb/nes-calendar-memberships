@@ -1,6 +1,19 @@
-# NES Calendar Memberships
+# NES Calendar & Memberships
 
-NES Calendar Memberships is a focused MemberPress extension for NES calendar-year memberships. It does not replace MemberPress, process payments, store cards, or implement custom Stripe billing-cycle anchoring.
+Created by **Rana Mustafiz and Cider House** for the New England Society in the City of New York. The plugin combines event series for The Events Calendar and calendar-year membership tools for MemberPress. [Releases and installable ZIPs](https://github.com/ranaweb/nes-calendar-memberships/releases)
+
+## Event series
+
+- Open **Events → Series → Add New Series** to create a named collection. Use **Find events** to add existing events. Publish the series to give visitors a page showing its upcoming and past events.
+- In **Events → Add New Event**, set **Time & Date**, then choose **Schedule multiple events**. For NES Monthly Meetups, choose **Monthly → Weekday of the month → Second → Monday**. **Preview dates** shows the schedule in the event timezone.
+- Choose **This event**, **This and following events**, or **All events in this schedule** when editing a recurring date. Individual changes are retained. Related one-off events keep their own details.
+- The **Series** box assigns an event to an existing series or creates a draft. Publish a newly created draft when its public page is ready. Ticket sales remain on each event.
+
+## Updating the two older plugins
+
+Upload the release ZIP over **NES Calendar Memberships** using WordPress **Plugins → Add Plugin → Upload Plugin**. The membership plugin folder, settings keys, shortcodes and renewal URL stay the same. On the next administrator visit the merged plugin silently deactivates the standalone **NES Calendar Extension**. Running the standalone plugin's ordinary Deactivate action before updating would restore the old Pro meetup.
+
+With The Events Calendar active and Pro inactive, the extension uses ordinary calendar events, retains their IDs, and fills a rolling 24-month window. The original meetup's recovery actions are under **Tools → NES Calendar Migration**. Member tools remain under **MemberPress → NES Calendar Memberships**. The Events Calendar and MemberPress integrations can operate independently.
 
 ## What It Does
 
@@ -10,9 +23,12 @@ NES Calendar Memberships is a focused MemberPress extension for NES calendar-yea
 - Shows clear checkout notices with membership year and December 31 expiration.
 - Records NES transaction metadata when MemberPress transactions are stored.
 - Provides dashboard shortcodes for membership level, status, expiration, renewal method, CTA, and summary.
-- Adds an admin helper for cheque, Zelle, and other offline renewals.
+- Adds an admin helper for check, Zelle, and other offline renewals.
 - Adds a read-only checkup screen for configuration issues.
 - Adds a conservative next-year membership generator.
+- Lets administrators add new membership types (families) without code, from a Membership Types screen.
+- Adds a How To reference tab for the NES team.
+- Presents memberships in NES institutional language and adjusts MemberPress's own customer-facing wording to match.
 
 ## What It Does Not Do
 
@@ -25,7 +41,7 @@ NES Calendar Memberships is a focused MemberPress extension for NES calendar-yea
 
 ## Requirements
 
-- WordPress 6.5 or later. Tested up to 7.0.
+- WordPress 6.6 or later.
 - PHP 8.1 or later.
 - MemberPress active for runtime integrations.
 
@@ -78,6 +94,10 @@ If MemberPress changes these internals, update `includes/class-memberpress-adapt
 - `firewood_individual`
 - `firewood_joint`
 
+Additional membership types can be added under `MemberPress > NES Calendar Memberships > Membership Types`.
+The family key is generated from the type name and is permanent once saved (renewal links depend on it).
+Built-in families cannot be removed, and a type that still has membership products assigned cannot be deleted.
+
 ## Renewal Routing
 
 Use:
@@ -103,18 +123,49 @@ The router calculates the target membership year from the current date and confi
 [nescm_membership_expiration]
 [nescm_renewal_method]
 [nescm_auto_renew_cta]
+[nescm_renew_cta]
 [nescm_membership_summary]
 ```
 
-Manual memberships use `Expires`. The plugin only uses automatic-renewal wording when it can detect an active MemberPress subscription.
+Yearly (one-time) memberships show `Expires <date>`; recurring memberships show `Renews <date>` using the
+subscription's next billing date; expired memberships show `Expired on <date>`. The plugin only uses
+recurring wording when it can detect an active MemberPress subscription.
+
+`[nescm_membership_expiration]` supports `part="label"` (just `Renews` / `Expires` / `Expired on`),
+`part="date"` (just the date), and `fallback="—"` for empty states — use these to compose label/value rows
+in Elementor.
+
+`[nescm_membership_status badge="yes"]` renders the status as a state-colored pill — green (active),
+amber (pending/none), red (expired) — instead of plain text.
+
+`[nescm_renew_cta]` shows a "Renew now for <year>" button to a yearly member once the next membership year
+is available to purchase (after the annual cutoff) or once their membership has expired. Active recurring
+members never see it, since they renew automatically — but expired recurring members do, so lapsed members
+always have a renewal path. Add `href="/renew/"` to send members to a renewal chooser page instead of
+directly to checkout.
+
+`[nescm_renewal_url]` (yearly) and `[nescm_auto_renew_url]` (recurring) output checkout URLs. With no
+`family` attribute they resolve the current member's family — so one renewal chooser page serves every
+membership family.
+
+## Member Access & WooCommerce Integration
+
+- **Dashboard gate** — set the Dashboard Page ID in settings; members (including expired members) can view
+  that page, other logged-in users are redirected to the WooCommerce account page, and logged-out visitors
+  go to the login page.
+- **Login routing** — members land on the dashboard after login; everyone else lands on the shop account
+  page; staff keep the WordPress default. Disable with the `nescm_login_routing_enabled` filter.
+- **WooCommerce** (when active) — members get a "Member Dashboard" item in the account navigation, and the
+  MemberPress member address stays in sync with the WooCommerce billing address in both directions
+  (Settings → Address Sync).
 
 ## Offline Payments / Manual Renewals
 
 Use `MemberPress > NES Calendar Memberships > Offline Payments / Manual Renewals`.
 
-The primary workflow is reviewing pending cheque/Zelle/offline MemberPress transactions. The screen shows pending NES transactions, calculates the target membership year from the payment received date and annual cutoff, then lets an admin complete and activate the transaction or cancel/void it.
+The primary workflow is reviewing pending check/Zelle/offline MemberPress transactions. The screen shows pending NES transactions, calculates the target membership year from the payment received date and annual cutoff, then lets an admin complete and activate the transaction or cancel/void it.
 
-The secondary workflow is `Create Manual Renewal Manually`. Use it only if the member did not complete an online cheque/Zelle checkout and you need to record a payment received outside the website.
+The secondary workflow is `Create Manual Renewal Manually`. Use it only if the member did not complete an online check/Zelle checkout and you need to record a payment received outside the website.
 
 The default action creates a pending manual renewal. Admins may choose completed renewal when recording money already received.
 
